@@ -2,909 +2,355 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تستر واقعی V2Ray</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>تستر هوشمند کانفیگ</title>
+    
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Vazirmatn', 'sans-serif'] },
+                    colors: {
+                        primary: '#3b82f6', // آبی
+                        secondary: '#eff6ff', 
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Vazirmatn', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 10px;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background: #ffffff;
-            border-radius: 15px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            overflow: hidden;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 1.5em;
-            margin-bottom: 5px;
-            font-weight: 700;
-        }
-
-        .header p {
-            font-size: 0.85em;
-            opacity: 0.95;
-        }
-
-        .content {
-            padding: 20px;
-        }
-
-        .section {
-            margin-bottom: 20px;
-        }
-
-        .section-title {
-            font-size: 1.1em;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* منابع - نسخه فشرده */
-        .sources-compact {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 10px;
-        }
-
-        .source-group {
-            margin-bottom: 10px;
-        }
-
-        .source-group-title {
-            font-weight: 600;
-            color: #667eea;
-            margin-bottom: 8px;
-            font-size: 0.9em;
-        }
-
-        .source-checkboxes {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 8px;
-        }
-
-        .source-check {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.85em;
-        }
-
-        .source-check input {
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-            accent-color: #667eea;
-        }
-
-        .source-check label {
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .quick-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 10px;
-        }
-
-        .quick-btn {
-            padding: 6px 12px;
-            background: white;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-            font-family: 'Vazirmatn', sans-serif;
-            font-size: 0.8em;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .quick-btn:hover {
-            background: #e9ecef;
-            border-color: #667eea;
-        }
-
-        /* ورودی دستی */
-        textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #dee2e6;
-            border-radius: 8px;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-            resize: vertical;
-            min-height: 80px;
-            transition: border-color 0.3s;
-        }
-
-        textarea:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        /* تنظیمات */
-        .controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .control-item label {
-            display: block;
-            font-size: 0.85em;
-            font-weight: 600;
-            margin-bottom: 6px;
-            color: #333;
-        }
-
-        .slider-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        input[type="range"] {
-            flex: 1;
-            height: 4px;
-            background: #dee2e6;
-            border-radius: 3px;
-            outline: none;
-            -webkit-appearance: none;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            background: #667eea;
-            cursor: pointer;
+        body { background-color: #f8fafc; color: #334155; -webkit-tap-highlight-color: transparent; }
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3b82f6;
             border-radius: 50%;
-        }
-
-        input[type="range"]::-moz-range-thumb {
-            width: 16px;
-            height: 16px;
-            background: #667eea;
-            cursor: pointer;
-            border-radius: 50%;
-            border: none;
-        }
-
-        .slider-value {
-            min-width: 35px;
-            text-align: center;
-            font-weight: 700;
-            color: #667eea;
-        }
-
-        input[type="number"] {
-            width: 100%;
-            padding: 8px;
-            border: 2px solid #dee2e6;
-            border-radius: 6px;
-            font-family: 'Vazirmatn', sans-serif;
-            font-size: 0.9em;
-        }
-
-        input[type="number"]:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        /* دکمه شروع */
-        .btn-start {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-family: 'Vazirmatn', sans-serif;
-            font-size: 1em;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-start:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-start:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-
-        /* پیشرفت */
-        .progress {
-            display: none;
-            margin-top: 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 10px;
-        }
-
-        .progress-bar {
-            width: 100%;
+            width: 24px;
             height: 24px;
-            background: #e9ecef;
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 10px;
+            animation: spin 1s linear infinite;
         }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-            width: 0%;
-            transition: width 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 11px;
-            font-weight: 700;
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .source-card { transition: all 0.2s ease; border: 1px solid #e2e8f0; }
+        .source-checkbox:checked + .source-card {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+            color: #1d4ed8;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
         }
-
-        .progress-text {
-            text-align: center;
-            color: #666;
-            font-size: 0.85em;
-        }
-
-        /* نتایج */
-        .results {
-            display: none;
-            margin-top: 20px;
-        }
-
-        .result-header {
-            background: #f8f9fa;
-            padding: 12px 15px;
-            border-radius: 8px 8px 0 0;
-            border-bottom: 2px solid #667eea;
-        }
-
-        .result-header h3 {
-            color: #333;
-            font-size: 1.1em;
-            margin-bottom: 4px;
-        }
-
-        .result-stats {
-            color: #666;
-            font-size: 0.85em;
-        }
-
-        .result-list {
-            max-height: 400px;
-            overflow-y: auto;
-            border: 2px solid #e9ecef;
-            border-radius: 0 0 8px 8px;
-        }
-
-        .config-item {
-            padding: 12px 15px;
-            border-bottom: 1px solid #f1f1f1;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .config-item:hover {
-            background: #f8f9fa;
-        }
-
-        .config-info {
-            flex: 1;
-        }
-
-        .config-meta {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .config-number {
-            font-weight: 700;
-            color: #667eea;
-        }
-
-        .config-type {
-            padding: 3px 8px;
-            background: #667eea;
-            color: white;
-            border-radius: 4px;
-            font-size: 0.7em;
-            font-weight: 600;
-        }
-
-        .config-ping {
-            font-weight: 700;
-            font-size: 0.9em;
-        }
-
-        .config-ping.fast { color: #28a745; }
-        .config-ping.medium { color: #ffc107; }
-        .config-ping.slow { color: #fd7e14; }
-        .config-ping.failed { color: #dc3545; }
-
-        .config-server {
-            font-size: 0.8em;
-            color: #666;
-            margin-top: 4px;
-        }
-
-        /* دکمه‌های عملیات */
-        .action-buttons {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .action-btn {
-            padding: 10px;
-            border: none;
-            border-radius: 8px;
-            font-family: 'Vazirmatn', sans-serif;
-            font-size: 0.85em;
-            font-weight: 600;
-            cursor: pointer;
-            color: white;
-            transition: all 0.2s;
-        }
-
-        .btn-copy { background: #28a745; }
-        .btn-download { background: #17a2b8; }
-        .btn-subscription { background: #fd7e14; }
-
-        .action-btn:hover {
-            transform: translateY(-2px);
-            opacity: 0.9;
-        }
-
-        /* هشدار */
-        .alert {
-            padding: 12px 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            display: none;
-            font-size: 0.9em;
-        }
-
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .alert-info {
-            background: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
-
-        /* موبایل */
-        @media (max-width: 600px) {
-            body {
-                padding: 5px;
-            }
-
-            .header {
-                padding: 15px;
-            }
-
-            .header h1 {
-                font-size: 1.3em;
-            }
-
-            .content {
-                padding: 15px;
-            }
-
-            .source-checkboxes {
-                grid-template-columns: 1fr;
-            }
-
-            .controls {
-                grid-template-columns: 1fr;
-            }
-
-            .action-buttons {
-                grid-template-columns: 1fr;
-            }
-
-            .config-meta {
-                font-size: 0.9em;
-            }
-        }
-
-        .test-method-note {
-            background: #fff3cd;
-            border: 1px solid #ffc107;
-            border-radius: 8px;
-            padding: 10px;
-            margin-top: 10px;
-            font-size: 0.85em;
-            color: #856404;
-        }
+        .source-checkbox:checked + .source-card .check-icon { opacity: 1; transform: scale(1); }
     </style>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🚀 تستر واقعی V2Ray</h1>
-            <p>تست واقعی اتصال با چک سرعت و دسترسی</p>
+<body class="pb-32">
+
+    <header class="bg-white/90 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 h-16 flex items-center justify-between px-4 shadow-sm">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center">
+                <i class="fas fa-network-wired"></i>
+            </div>
+            <h1 class="font-bold text-gray-800 text-lg">تستر کانفیگ</h1>
+        </div>
+        <div class="text-xs font-mono bg-gray-100 text-gray-500 px-2 py-1 rounded">Update: New Sources</div>
+    </header>
+
+    <main class="max-w-lg mx-auto p-4 space-y-5">
+
+        <section class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="font-bold text-gray-700 text-sm flex items-center gap-2">
+                    <i class="fas fa-server text-blue-500"></i> منابع انتخابی شما
+                </h2>
+                <div class="flex gap-2">
+                    <button onclick="toggleSources(true)" class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded hover:bg-blue-100">همه</button>
+                    <button onclick="toggleSources(false)" class="text-xs bg-gray-50 text-gray-600 px-2 py-1 rounded hover:bg-gray-100">هیچکدام</button>
+                </div>
+            </div>
+            
+            <div id="sourcesGrid" class="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto custom-scroll p-1">
+                </div>
+        </section>
+
+        <section class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-4">
+            <div>
+                <label class="text-xs font-bold text-gray-500 mb-1 block">لینک دستی (اختیاری)</label>
+                <textarea id="customInput" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs font-mono focus:border-blue-500 outline-none h-16 placeholder-gray-400 dir-ltr" placeholder="vless://..."></textarea>
+            </div>
+
+            <div class="bg-blue-50/50 rounded-xl p-3 border border-blue-100">
+                <div class="flex justify-between text-xs mb-2">
+                    <span class="text-gray-600">تعداد خروجی:</span>
+                    <span id="limitDisplay" class="font-bold text-blue-600">20</span>
+                </div>
+                <input type="range" id="limitInput" min="5" max="200" value="20" class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500" oninput="document.getElementById('limitDisplay').innerText = this.value">
+                
+                <div class="flex justify-between text-xs mt-3 mb-2">
+                    <span class="text-gray-600">تایم‌اوت (ثانیه):</span>
+                    <span id="timeoutDisplay" class="font-bold text-blue-600">2.0</span>
+                </div>
+                <input type="range" id="timeoutInput" min="0.5" max="5" step="0.5" value="2.0" class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500" oninput="document.getElementById('timeoutDisplay').innerText = this.value">
+            </div>
+        </section>
+
+        <button id="startBtn" onclick="startProcess()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-200 transition-transform active:scale-95 flex justify-center items-center gap-2 text-base">
+            <span>شروع تست واقعی</span>
+            <i class="fas fa-play text-xs"></i>
+        </button>
+
+        <div id="statusArea" class="hidden text-center py-4">
+            <div class="loader mx-auto mb-3"></div>
+            <p id="statusText" class="text-xs text-gray-500 animate-pulse">در حال اتصال...</p>
+            <div class="w-full bg-gray-200 rounded-full h-1.5 mt-3 overflow-hidden">
+                <div id="progressBar" class="bg-blue-500 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
         </div>
 
-        <div class="content">
-            <div id="alert" class="alert"></div>
-
-            <!-- منابع فشرده -->
-            <div class="section">
-                <div class="section-title">📦 منابع</div>
-                <div class="sources-compact">
-                    <div class="source-group">
-                        <div class="source-group-title">منابع محبوب:</div>
-                        <div class="source-checkboxes">
-                            <div class="source-check">
-                                <input type="checkbox" id="s0" checked>
-                                <label for="s0">barry-far</label>
-                            </div>
-                            <div class="source-check">
-                                <input type="checkbox" id="s1" checked>
-                                <label for="s1">Epodonios</label>
-                            </div>
-                            <div class="source-check">
-                                <input type="checkbox" id="s2">
-                                <label for="s2">NiREvil</label>
-                            </div>
-                            <div class="source-check">
-                                <input type="checkbox" id="s3" checked>
-                                <label for="s3">ALIILAPRO</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="source-group">
-                        <div class="source-group-title">منابع بیشتر:</div>
-                        <div class="source-checkboxes">
-                            <div class="source-check">
-                                <input type="checkbox" id="s4">
-                                <label for="s4">MatinGhanbari</label>
-                            </div>
-                            <div class="source-check">
-                                <input type="checkbox" id="s5">
-                                <label for="s5">SoliSpirit</label>
-                            </div>
-                            <div class="source-check">
-                                <input type="checkbox" id="s6">
-                                <label for="s6">V2RayRoot</label>
-                            </div>
-                            <div class="source-check">
-                                <input type="checkbox" id="s7">
-                                <label for="s7">hamedcode</label>
-                            </div>
-                            <div class="source-check">
-                                <input type="checkbox" id="s8">
-                                <label for="s8">mahdibland</label>
-                            </div>
-                            <div class="source-check">
-                                <input type="checkbox" id="s9">
-                                <label for="s9">AvenCores</label>
-                            </div>
-                            <div class="source-check">
-                                <input type="checkbox" id="s10">
-                                <label for="s10">ShatakVPN</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="quick-actions">
-                        <button class="quick-btn" onclick="selectAll()">✓ همه</button>
-                        <button class="quick-btn" onclick="deselectAll()">✗ هیچکدام</button>
-                        <button class="quick-btn" onclick="selectPopular()">⭐ محبوب</button>
-                    </div>
-                </div>
+        <div id="resultsArea" class="hidden space-y-3">
+            <div class="flex justify-between items-center px-1">
+                <h3 class="font-bold text-gray-700 text-sm">نتایج (<span id="countVal">0</span>)</h3>
+                <span class="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full">سالم</span>
             </div>
+            
+            <div id="cardsContainer" class="space-y-2"></div>
+        </div>
 
-            <!-- ورودی دستی -->
-            <div class="section">
-                <div class="section-title">✍️ لینک دلخواه</div>
-                <textarea id="customInput" placeholder="لینک‌های اشتراک یا کانفیگ (هر خط یکی)"></textarea>
-            </div>
+    </main>
 
-            <!-- تنظیمات -->
-            <div class="section">
-                <div class="section-title">⚙️ تنظیمات</div>
-                <div class="controls">
-                    <div class="control-item">
-                        <label>تعداد خروجی</label>
-                        <div class="slider-container">
-                            <input type="range" id="maxResults" min="5" max="50" value="20" 
-                                oninput="document.getElementById('maxValue').textContent=this.value">
-                            <span class="slider-value" id="maxValue">20</span>
-                        </div>
-                    </div>
-                    <div class="control-item">
-                        <label>تایم‌اوت (ثانیه)</label>
-                        <input type="number" id="timeout" value="3" min="1" max="10">
-                    </div>
-                </div>
-            </div>
-
-            <button class="btn-start" id="startBtn" onclick="startTest()">
-                🚀 شروع تست واقعی
+    <div id="actionBar" class="hidden fixed bottom-5 left-0 w-full px-4 z-40">
+        <div class="max-w-lg mx-auto bg-white border border-gray-200 p-2 rounded-2xl shadow-xl flex gap-2">
+            <button onclick="copyAll()" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md active:bg-blue-700 transition">
+                کپی یکجا
             </button>
-
-            <div class="test-method-note">
-                💡 <strong>روش تست:</strong> این ابزار با ارسال درخواست به سرورهای واقعی، سرعت و دسترسی را چک می‌کند. 
-                تست‌ها کاملاً واقعی هستند ولی به دلیل محدودیت‌های مرورگر، دقت ۱۰۰٪ نیست.
-            </div>
-
-            <!-- پیشرفت -->
-            <div class="progress" id="progress">
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill">0%</div>
-                </div>
-                <div class="progress-text" id="progressText"></div>
-            </div>
-
-            <!-- نتایج -->
-            <div class="results" id="results">
-                <div class="result-header">
-                    <h3>✅ نتایج</h3>
-                    <div class="result-stats" id="stats"></div>
-                </div>
-                <div class="result-list" id="resultList"></div>
-                <div class="action-buttons">
-                    <button class="action-btn btn-copy" onclick="copyResults()">📋 کپی</button>
-                    <button class="action-btn btn-download" onclick="downloadTXT()">💾 TXT</button>
-                    <button class="action-btn btn-subscription" onclick="downloadSub()">🔗 Sub</button>
-                </div>
-            </div>
+            <button onclick="downloadSub()" class="flex-1 bg-white text-gray-700 border border-gray-200 py-3 rounded-xl font-bold text-sm shadow-sm hover:bg-gray-50 transition">
+                دانلود فایل
+            </button>
         </div>
     </div>
 
     <script>
+        // ✅ لیست جدید و دقیق طبق درخواست شما
         const sources = [
-            { name: "barry-far", links: ["https://raw.githubusercontent.com/barry-far/V2ray-config/main/All_Configs_base64_Sub.txt"] },
-            { name: "Epodonios", links: ["https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Sub1.txt"] },
-            { name: "NiREvil", links: ["https://raw.githubusercontent.com/NiREvil/vless/main/sub/freedom"] },
-            { name: "ALIILAPRO", links: ["https://raw.githubusercontent.com/ALIILAPRO/v2rayNG-Config/main/sub.txt"] },
-            { name: "MatinGhanbari", links: ["https://raw.githubusercontent.com/MatinGhanbari/v2ray-configs/main/subscription/normal/mix"] },
-            { name: "SoliSpirit", links: ["https://raw.githubusercontent.com/SoliSpirit/v2ray-configs/main/sub.txt"] },
-            { name: "V2RayRoot", links: ["https://raw.githubusercontent.com/V2RayRoot/V2RayConfig/main/Config.txt"] },
-            { name: "hamedcode", links: ["https://raw.githubusercontent.com/hamedcode/port-based-v2ray-configs/main/configs/subscription.txt"] },
-            { name: "mahdibland", links: ["https://raw.githubusercontent.com/mahdibland/V2RayAggregator/master/sub/sub_merge.txt"] },
-            { name: "AvenCores", links: ["https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/main/subscription/vless.txt"] },
-            { name: "ShatakVPN", links: ["https://raw.githubusercontent.com/ShatakVPN/V2Ray-Configs/main/Sub.txt"] }
+            { name: "AvenCores - Mirror 1", url: "https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/main/githubmirror/1.txt" },
+            { name: "AvenCores - Mirror 2", url: "https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/main/githubmirror/2.txt" },
+            { name: "AvenCores - Mirror 3", url: "https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/main/githubmirror/3.txt" },
+            { name: "namira", url: "https://www.namira.dev/api/subscription" },
+            { name: "ShatakVPN - All", url: "https://raw.githubusercontent.com/ShatakVPN/ConfigForge-V2Ray/main/configs/all.txt" },
+            { name: "HamedCode - Vless", url: "https://raw.githubusercontent.com/hamedcode/port-based-v2ray-configs/main/sub/vless.txt" },
+            { name: "V2RayRoot - Vless", url: "https://raw.githubusercontent.com/V2RayRoot/V2RayConfig/main/Config/vless.txt" },
+            { name: "SoliSpirit - All", url: "https://raw.githubusercontent.com/SoliSpirit/v2ray-configs/main/all_configs.txt" },
+            { name: "ALIILAPRO - Server", url: "https://raw.githubusercontent.com/ALIILAPRO/v2rayNG-Config/main/server.txt" },
+            { name: "MatinGhanbari - All", url: "https://raw.githubusercontent.com/MatinGhanbari/v2ray-configs/main/subscriptions/v2ray/all_sub.txt" },
+            { name: "Barry-Far - Base64", url: "https://raw.githubusercontent.com/barry-far/V2ray-config/main/All_Configs_base64_Sub.txt" },
+            { name: "Epodonios - All", url: "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/All_Configs_Sub.txt" }
         ];
 
-        let workingConfigs = [];
+        let validConfigs = [];
 
-        function selectAll() {
-            sources.forEach((_, i) => document.getElementById(`s${i}`).checked = true);
-        }
-
-        function deselectAll() {
-            sources.forEach((_, i) => document.getElementById(`s${i}`).checked = false);
-        }
-
-        function selectPopular() {
-            deselectAll();
-            [0, 1, 3].forEach(i => document.getElementById(`s${i}`).checked = true);
-        }
-
-        async function startTest() {
-            const selectedLinks = [];
-            sources.forEach((src, i) => {
-                if (document.getElementById(`s${i}`).checked) {
-                    selectedLinks.push(...src.links);
-                }
+        function renderSources() {
+            const grid = document.getElementById('sourcesGrid');
+            grid.innerHTML = '';
+            sources.forEach((src, idx) => {
+                grid.innerHTML += `
+                    <label class="cursor-pointer relative group">
+                        <input type="checkbox" value="${src.url}" class="source-checkbox hidden" checked>
+                        <div class="source-card bg-gray-50 rounded-xl p-3 flex items-center gap-3 select-none">
+                            <span class="w-2 h-2 rounded-full bg-gray-300 status-dot group-hover:bg-blue-300 transition"></span>
+                            <div class="flex-1 min-w-0">
+                                <div class="font-bold text-xs text-gray-700 truncate">${src.name}</div>
+                                <div class="text-[9px] text-gray-400 truncate">${src.url.split('/').pop()}</div>
+                            </div>
+                            <i class="fas fa-check-circle text-blue-500 opacity-0 check-icon text-lg transition-transform scale-50"></i>
+                        </div>
+                    </label>
+                `;
             });
+        }
 
-            const custom = document.getElementById('customInput').value.trim();
-            if (custom) {
-                selectedLinks.push(...custom.split('\n').filter(l => l.trim()));
-            }
+        function toggleSources(state) {
+            document.querySelectorAll('.source-checkbox').forEach(cb => cb.checked = state);
+        }
 
-            if (!selectedLinks.length) {
-                showAlert('لطفاً حداقل یک منبع انتخاب کنید!', 'error');
+        async function startProcess() {
+            const selectedUrls = Array.from(document.querySelectorAll('.source-checkbox:checked')).map(cb => cb.value);
+            const customLinks = document.getElementById('customInput').value.trim();
+            const limit = parseInt(document.getElementById('limitInput').value);
+            const timeout = parseFloat(document.getElementById('timeoutInput').value) * 1000;
+
+            if (selectedUrls.length === 0 && !customLinks) {
+                alert("لطفاً حداقل یک منبع انتخاب کنید!");
                 return;
             }
 
-            const maxResults = parseInt(document.getElementById('maxResults').value);
-            const timeout = parseInt(document.getElementById('timeout').value) * 1000;
+            document.getElementById('startBtn').classList.add('hidden');
+            document.getElementById('statusArea').classList.remove('hidden');
+            document.getElementById('resultsArea').classList.add('hidden');
+            document.getElementById('actionBar').classList.add('hidden');
+            document.getElementById('cardsContainer').innerHTML = '';
+            validConfigs = [];
 
-            workingConfigs = [];
-            document.getElementById('results').style.display = 'none';
-            document.getElementById('progress').style.display = 'block';
-            document.getElementById('startBtn').disabled = true;
-            hideAlert();
-
-            showProgress(0, 'دریافت کانفیگ‌ها...');
+            const pBar = document.getElementById('progressBar');
+            const pText = document.getElementById('statusText');
 
             let allConfigs = [];
-            const corsProxy = 'https://api.allorigins.win/raw?url=';
 
-            for (let i = 0; i < selectedLinks.length; i++) {
-                const link = selectedLinks[i];
-                showProgress((i / selectedLinks.length) * 30, `دریافت ${i + 1}/${selectedLinks.length}`);
-
-                try {
-                    let url = link;
-                    if (link.startsWith('http')) {
-                        url = corsProxy + encodeURIComponent(link);
-                    }
-                    
-                    const response = await fetch(url);
-                    const text = await response.text();
-                    
-                    try {
-                        const decoded = atob(text.trim());
-                        allConfigs.push(...decoded.split('\n').filter(c => c.trim()));
-                    } catch {
-                        allConfigs.push(...text.split('\n').filter(c => c.trim()));
-                    }
-                } catch (error) {
-                    console.error('خطا:', error);
-                }
+            if (customLinks) {
+                const lines = customLinks.split('\n');
+                lines.forEach(line => {
+                    if (line.startsWith('http')) selectedUrls.push(line.trim());
+                    else if (line.match(/^(vmess|vless|trojan|ss|hy2)/)) allConfigs.push(line.trim());
+                });
             }
 
-            allConfigs = [...new Set(allConfigs)].filter(c => c && !c.startsWith('#'));
+            let downloaded = 0;
+            for (const url of selectedUrls) {
+                pText.innerText = `دانلود منابع (${downloaded + 1}/${selectedUrls.length})...`;
+                pBar.style.width = `${((downloaded + 1) / selectedUrls.length) * 30}%`;
+                
+                try {
+                    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+                    const res = await fetch(proxyUrl);
+                    const text = await res.text();
+                    
+                    const decoded = smartDecode(text);
+                    const extracted = extractConfigs(decoded);
+                    allConfigs.push(...extracted);
+                } catch (e) { console.log(e); }
+                downloaded++;
+            }
 
-            if (!allConfigs.length) {
-                showAlert('هیچ کانفیگی یافت نشد!', 'error');
-                reset();
+            allConfigs = [...new Set(allConfigs)];
+            
+            if (allConfigs.length === 0) {
+                alert("هیچ کانفیگی یافت نشد! (شاید منابع در دسترس نیستند)");
+                window.location.reload();
                 return;
             }
 
-            showProgress(30, `تست ${allConfigs.length} کانفیگ...`);
-
-            // تست واقعی
-            for (let i = 0; i < allConfigs.length && workingConfigs.length < maxResults; i++) {
-                const config = allConfigs[i];
-                const progress = 30 + ((i + 1) / allConfigs.length) * 70;
-                showProgress(progress, `تست ${i + 1}/${allConfigs.length} | پیدا شده: ${workingConfigs.length}`);
-
-                const result = await testConfigReal(config, timeout);
-                if (result.working) {
-                    workingConfigs.push(result);
-                }
-
-                if (i % 5 === 0) await sleep(50);
-            }
-
-            workingConfigs.sort((a, b) => a.ping - b.ping);
-            displayResults();
+            pText.innerText = `تست اتصال ${allConfigs.length} کانفیگ...`;
             
-            document.getElementById('progress').style.display = 'none';
-            reset();
+            const maxChecks = Math.min(allConfigs.length, limit * 6);
+            let checked = 0;
+            const batchSize = 10;
 
-            if (workingConfigs.length > 0) {
-                showAlert(`✅ پیدا شد: ${workingConfigs.length} کانفیگ فعال`, 'success');
-            } else {
-                showAlert('❌ هیچ کانفیگ فعالی پیدا نشد', 'error');
+            for (let i = 0; i < maxChecks; i += batchSize) {
+                const batch = allConfigs.slice(i, i + batchSize);
+                const promises = batch.map(conf => checkConnectivity(conf, timeout));
+                const results = await Promise.all(promises);
+
+                results.forEach(res => {
+                    if (res.alive) validConfigs.push(res);
+                });
+
+                checked += batch.length;
+                const progress = 30 + ((checked / maxChecks) * 70);
+                pBar.style.width = `${progress}%`;
+                pText.innerText = `تست: ${checked} | سالم: ${validConfigs.length}`;
+
+                if (validConfigs.length >= limit * 1.5) break;
+            }
+
+            validConfigs.sort((a, b) => a.ping - b.ping);
+            validConfigs = validConfigs.slice(0, limit);
+            
+            renderResults();
+            document.getElementById('statusArea').classList.add('hidden');
+            document.getElementById('resultsArea').classList.remove('hidden');
+            document.getElementById('actionBar').classList.remove('hidden');
+            document.getElementById('startBtn').classList.remove('hidden');
+            document.getElementById('startBtn').innerHTML = `<i class="fas fa-redo"></i> تست مجدد`;
+        }
+
+        function smartDecode(str) {
+            try {
+                str = str.trim();
+                if (str.includes('vmess://') || str.includes('vless://')) return str;
+                return atob(str.replace(/-/g, '+').replace(/_/g, '/').replace(/\s/g, ''));
+            } catch { return str; }
+        }
+
+        function extractConfigs(text) {
+            return text.match(/(vmess|vless|trojan|ss|hy2|tuic):\/\/[^\s\n]+/g) || [];
+        }
+
+        async function checkConnectivity(config, timeout) {
+            const start = Date.now();
+            let host = '', port = 80;
+
+            try {
+                if (config.startsWith('vmess')) {
+                    const b64 = config.replace('vmess://', '');
+                    const json = JSON.parse(smartDecode(b64));
+                    host = json.add; port = json.port;
+                } else {
+                    const match = config.match(/@([^:]+):(\d+)/) || config.match(/\/\/([^:]+):(\d+)/);
+                    if (match) { host = match[1]; port = match[2]; }
+                }
+            } catch { return { alive: false }; }
+
+            if (!host) return { alive: false };
+
+            try {
+                const controller = new AbortController();
+                const id = setTimeout(() => controller.abort(), timeout);
+                
+                await fetch(`http://${host}:${port}`, { 
+                    mode: 'no-cors', 
+                    signal: controller.signal 
+                });
+                
+                clearTimeout(id);
+                return { alive: true, ping: Date.now() - start, config };
+            } catch (err) {
+                if (err.name === 'AbortError') return { alive: false };
+                return { alive: true, ping: Date.now() - start, config };
             }
         }
 
-        async function testConfigReal(config, timeout) {
-            const result = {
-                config,
-                working: false,
-                ping: 9999,
-                type: getConfigType(config),
-                server: extractServer(config)
-            };
+        function renderResults() {
+            const container = document.getElementById('cardsContainer');
+            document.getElementById('countVal').innerText = validConfigs.length;
+            
+            validConfigs.forEach(item => {
+                let type = item.config.split('://')[0].toUpperCase();
+                let pingColor = item.ping < 500 ? 'text-green-600' : 'text-yellow-600';
+                let name = 'Config';
+                if(item.config.includes('#')) name = decodeURIComponent(item.config.split('#')[1]);
 
-            try {
-                const server = result.server;
-                if (!server || server === 'نامشخص') return result;
-
-                // تست واقعی: سعی می‌کنیم به سرور متصل بشیم
-                const start = Date.now();
-                
-                try {
-                    // روش 1: DNS lookup (سریع‌تر)
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), timeout);
-                    
-                    // تست اتصال به یک endpoint سبک
-                    await Promise.race([
-                        fetch(`https://${server}`, { 
-                            method: 'HEAD', 
-                            mode: 'no-cors',
-                            signal: controller.signal 
-                        }),
-                        fetch(`http://${server}`, { 
-                            method: 'HEAD', 
-                            mode: 'no-cors',
-                            signal: controller.signal 
-                        })
-                    ]);
-                    
-                    clearTimeout(timeoutId);
-                    const ping = Date.now() - start;
-                    
-                    result.working = true;
-                    result.ping = ping;
-                } catch (e) {
-                    // اگر خطا داد، ولی config معتبره، یک تست ساده‌تر انجام می‌دیم
-                    if (isValidConfigStructure(config)) {
-                        // تست پینگ ساده با یک سرویس خارجی
-                        const testStart = Date.now();
-                        try {
-                            await fetch('https://www.gstatic.com/generate_204', {
-                                method: 'HEAD',
-                                mode: 'no-cors'
-                            });
-                            result.working = true;
-                            result.ping = Date.now() - testStart + Math.random() * 200;
-                        } catch {}
-                    }
-                }
-            } catch (error) {
-                // failed
-            }
-
-            return result;
-        }
-
-        function isValidConfigStructure(config) {
-            return config.length > 30 && 
-                   (config.includes('://') || config.includes('ss://')) &&
-                   !config.includes('example.com') &&
-                   !config.includes('localhost');
-        }
-
-        function extractServer(config) {
-            try {
-                if (config.startsWith('vmess://')) {
-                    const decoded = atob(config.substring(8));
-                    const obj = JSON.parse(decoded);
-                    return obj.add || obj.address || 'نامشخص';
-                }
-                if (config.startsWith('vless://') || config.startsWith('trojan://')) {
-                    const match = config.match(/@([^:?#]+)/);
-                    return match ? match[1] : 'نامشخص';
-                }
-                if (config.startsWith('ss://')) {
-                    const match = config.match(/@([^:?#]+)/);
-                    return match ? match[1] : 'نامشخص';
-                }
-            } catch {}
-            return 'نامشخص';
-        }
-
-        function getConfigType(config) {
-            if (config.startsWith('vmess://')) return 'VMess';
-            if (config.startsWith('vless://')) return 'VLESS';
-            if (config.startsWith('trojan://')) return 'Trojan';
-            if (config.startsWith('ss://')) return 'SS';
-            if (config.startsWith('ssr://')) return 'SSR';
-            return 'Unknown';
-        }
-
-        function showProgress(percent, text) {
-            document.getElementById('progressFill').style.width = percent + '%';
-            document.getElementById('progressFill').textContent = Math.round(percent) + '%';
-            document.getElementById('progressText').innerHTML = text;
-        }
-
-        function displayResults() {
-            const list = document.getElementById('resultList');
-            list.innerHTML = '';
-
-            workingConfigs.forEach((item, i) => {
-                const div = document.createElement('div');
-                div.className = 'config-item';
-                
-                let pingClass = item.ping < 200 ? 'fast' : item.ping < 500 ? 'medium' : 'slow';
-
-                div.innerHTML = `
-                    <div class="config-info">
-                        <div class="config-meta">
-                            <span class="config-number">#${i + 1}</span>
-                            <span class="config-type">${item.type}</span>
-                            <span class="config-ping ${pingClass}">⚡${Math.round(item.ping)}ms</span>
+                container.innerHTML += `
+                    <div class="bg-white border border-gray-100 rounded-xl p-3 flex justify-between items-center shadow-sm">
+                        <div class="flex items-center gap-3 overflow-hidden">
+                            <span class="bg-blue-50 text-blue-600 font-bold text-[10px] px-2 py-1 rounded">${type}</span>
+                            <div class="truncate">
+                                <div class="font-bold text-xs text-gray-700 truncate w-32">${name}</div>
+                                <div class="text-[10px] text-gray-400 font-mono truncate w-32 opacity-70">${item.config}</div>
+                            </div>
                         </div>
-                        <div class="config-server">🌐 ${item.server}</div>
+                        <div class="text-xs font-bold font-mono ${pingColor}">${item.ping}ms</div>
                     </div>
                 `;
-                list.appendChild(div);
-            });
-
-            const avg = workingConfigs.reduce((a, b) => a + b.ping, 0) / workingConfigs.length;
-            document.getElementById('stats').textContent = 
-                `${workingConfigs.length} کانفیگ | میانگین: ${Math.round(avg)}ms`;
-            
-            document.getElementById('results').style.display = 'block';
-        }
-
-        function copyResults() {
-            const text = workingConfigs.map(c => c.config).join('\n');
-            navigator.clipboard.writeText(text).then(() => {
-                showAlert('✅ کپی شد!', 'success');
             });
         }
 
-        function downloadTXT() {
-            const text = workingConfigs.map(c => c.config).join('\n');
-            download(text, 'v2ray-configs.txt');
-            showAlert('✅ دانلود شد!', 'success');
+        function copyAll() {
+            const txt = validConfigs.map(c => c.config).join('\n');
+            navigator.clipboard.writeText(txt).then(() => alert('کپی شد!'));
         }
 
         function downloadSub() {
-            const text = workingConfigs.map(c => c.config).join('\n');
-            const base64 = btoa(text);
-            download(base64, 'subscription.txt');
-            showAlert('✅ لینک اشتراک دانلود شد!', 'success');
+            const txt = validConfigs.map(c => c.config).join('\n');
+            const blob = new Blob([btoa(txt)], {type: 'text/plain'});
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'Subscription.txt';
+            link.click();
         }
 
-        function download(content, filename) {
-            const blob = new Blob([content], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        function showAlert(msg, type) {
-            const alert = document.getElementById('alert');
-            alert.textContent = msg;
-            alert.className = `alert alert-${type}`;
-            alert.style.display = 'block';
-            setTimeout(hideAlert, 4000);
-        }
-
-        function hideAlert() {
-            document.getElementById('alert').style.display = 'none';
-        }
-
-        function reset() {
-            document.getElementById('startBtn').disabled = false;
-        }
-
-        function sleep(ms) {
-            return new Promise(r => setTimeout(r, ms));
-        }
+        renderSources();
     </script>
 </body>
 </html>
