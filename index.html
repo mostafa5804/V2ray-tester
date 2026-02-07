@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>تستر هوشمند کانفیگ | نسخه ۵</title>
+    <title>تستر هوشمند کانفیگ | نسخه نهایی</title>
     
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -23,17 +23,14 @@
 
     <style>
         body { background-color: #f8fafc; color: #334155; -webkit-tap-highlight-color: transparent; }
-        .glass-panel { background: rgba(255, 255, 255, 0.95); border: 1px solid #e2e8f0; }
         .custom-scroll::-webkit-scrollbar { width: 4px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .loader-spin { border: 2px solid #e2e8f0; border-top: 2px solid #2563eb; border-radius: 50%; width: 16px; height: 16px; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        /* استایل منبع */
         .source-card { transition: all 0.2s; border: 1px solid #f1f5f9; }
         .source-checkbox:checked + .source-card { border-color: #3b82f6; background-color: #eff6ff; }
-        .source-checkbox:checked + .source-card .check-icon { opacity: 1; transform: scale(1); }
         .count-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #e2e8f0; color: #64748b; }
         .count-badge.success { background: #dcfce7; color: #166534; }
         .count-badge.error { background: #fee2e2; color: #991b1b; }
@@ -48,7 +45,7 @@
             </div>
             <h1 class="font-bold text-gray-800 text-base">تستر کانفیگ</h1>
         </div>
-        <div class="text-[10px] font-mono bg-gray-100 text-gray-500 px-2 py-1 rounded-full">V5.0 Decode+</div>
+        <div class="text-[10px] font-mono bg-gray-100 text-gray-500 px-2 py-1 rounded-full">V6.0 Ultra Decode</div>
     </header>
 
     <main class="max-w-xl mx-auto p-4 space-y-5">
@@ -60,14 +57,13 @@
                 </h2>
                 <div class="flex gap-2">
                     <button onclick="checkSelectedSources()" class="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded hover:bg-blue-100 flex items-center gap-1">
-                        <i class="fas fa-sync-alt"></i> بروزرسانی تعداد
+                        <i class="fas fa-sync-alt"></i> بررسی حجم
                     </button>
                     <button onclick="toggleSources(true)" class="text-[10px] bg-gray-50 text-gray-600 px-2 py-1 rounded hover:bg-gray-100">همه</button>
                 </div>
             </div>
             
-            <div id="sourcesGrid" class="grid grid-cols-1 gap-2 max-h-56 overflow-y-auto custom-scroll p-1">
-                </div>
+            <div id="sourcesGrid" class="grid grid-cols-1 gap-2 max-h-56 overflow-y-auto custom-scroll p-1"></div>
         </section>
 
         <div class="bg-white rounded-2xl p-3 shadow-sm border border-gray-100 space-y-2">
@@ -78,7 +74,7 @@
             <div class="relative">
                 <textarea id="customInput" class="w-full h-20 p-3 text-xs bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 transition font-mono dir-ltr" placeholder="لینک خود را اینجا پیست کنید..."></textarea>
                 <button onclick="checkManualLink()" class="absolute bottom-2 right-2 bg-blue-600 text-white text-[10px] px-3 py-1.5 rounded-lg shadow-md hover:bg-blue-700 transition flex items-center gap-1">
-                    <i class="fas fa-search"></i> بررسی لینک
+                    <i class="fas fa-search"></i> بررسی
                 </button>
             </div>
         </div>
@@ -99,7 +95,7 @@
         </section>
 
         <button id="startBtn" onclick="startFullProcess()" class="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-200 transition-all active:scale-95 flex justify-center items-center gap-2 text-sm">
-            <span>شروع آنالیز و تست سرعت</span>
+            <span>شروع تست سرعت</span>
             <i class="fas fa-rocket"></i>
         </button>
 
@@ -147,11 +143,10 @@
 
     <script>
         // --- منابع ---
-        // لیست منابع که شامل لینک‌های Base64 و متنی است
         const sources = [
-            { id: 's1', name: "Barry-Far (Base64)", url: "https://raw.githubusercontent.com/barry-far/V2ray-config/main/All_Configs_base64_Sub.txt" },
-            { id: 's2', name: "ALIILAPRO (Mix)", url: "https://raw.githubusercontent.com/ALIILAPRO/v2rayNG-Config/main/server.txt" },
-            { id: 's3', name: "V2RayRoot", url: "https://raw.githubusercontent.com/V2RayRoot/V2RayConfig/main/Config/vless.txt" },
+            { id: 's1', name: "MyVPN (Mostafa)", url: "https://raw.githubusercontent.com/mostafa5804/Myvpn1404/refs/heads/main/sub.txt" },
+            { id: 's2', name: "Barry-Far (Base64)", url: "https://raw.githubusercontent.com/barry-far/V2ray-config/main/All_Configs_base64_Sub.txt" },
+            { id: 's3', name: "ALIILAPRO (Mix)", url: "https://raw.githubusercontent.com/ALIILAPRO/v2rayNG-Config/main/server.txt" },
             { id: 's4', name: "ShatakVPN", url: "https://raw.githubusercontent.com/ShatakVPN/ConfigForge-V2Ray/main/configs/all.txt" },
             { id: 's5', name: "MatinGhanbari", url: "https://raw.githubusercontent.com/MatinGhanbari/v2ray-configs/main/subscriptions/v2ray/all_sub.txt" },
             { id: 's6', name: "Epodonios", url: "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/All_Configs_Sub.txt" },
@@ -162,7 +157,6 @@
         let validConfigs = [];
         let allFetchedConfigs = [];
 
-        // --- رندر اولیه ---
         function renderSources() {
             const grid = document.getElementById('sourcesGrid');
             grid.innerHTML = '';
@@ -186,14 +180,12 @@
             document.querySelectorAll('.source-checkbox').forEach(cb => cb.checked = state);
         }
 
-        // --- توابع هسته (Core Logic) ---
-
-        // 1. دانلود با پروکسی (برای دور زدن محدودیت‌های ایران و گیت‌هاب)
+        // --- دیکودر قدرتمند ---
         async function fetchContent(url) {
             const proxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
             try {
                 const controller = new AbortController();
-                const id = setTimeout(() => controller.abort(), 8000); // 8 ثانیه تایم‌اوت دانلود
+                const id = setTimeout(() => controller.abort(), 8000); 
                 const res = await fetch(proxy, { signal: controller.signal });
                 clearTimeout(id);
                 if (!res.ok) throw new Error('Network Error');
@@ -204,34 +196,38 @@
             }
         }
 
-        // 2. دیکودر هوشمند (شاه‌کلید حل مشکل!)
-        function smartExtract(text) {
-            if (!text) return [];
+        function universalDecode(content) {
+            if (!content) return [];
             let configs = [];
-            text = text.trim();
+            content = content.trim();
 
-            // الف: آیا این یک فایل Base64 خالص است؟ (مثل barry-far)
-            if (!text.includes('://') && /^[a-zA-Z0-9+/=\n\r]+$/.test(text)) {
-                try {
-                    const decoded = atob(text.replace(/[\n\r\s]/g, ''));
-                    // حالا داخل متن دیکود شده دنبال کانفیگ بگرد
-                    const extracted = decoded.match(/(vmess|vless|trojan|ss|hy2|tuic):\/\/[^\s\n]+/g);
-                    if (extracted) configs.push(...extracted);
-                } catch (e) {
-                    console.log("Base64 Decode Failed, trying regex directly");
-                }
+            // 1. استخراج مستقیم اگر متن ساده باشد
+            const direct = content.match(/(vmess|vless|trojan|ss|hy2|tuic):\/\/[^\s\n]+/g);
+            if (direct && direct.length > 0) {
+                configs.push(...direct);
             }
-            
-            // ب: جستجوی مستقیم (برای فایل‌های متنی معمولی مثل ALIILAPRO)
-            const directMatches = text.match(/(vmess|vless|trojan|ss|hy2|tuic):\/\/[^\s\n]+/g);
-            if (directMatches) configs.push(...directMatches);
 
-            // حذف تکراری‌ها و تمیزکاری
-            return [...new Set(configs)];
+            // 2. تلاش برای دیکد Base64 (حتی اگر مستقیم پیدا شد، شاید میکس باشد)
+            try {
+                // تمیز کردن کاراکترهای مزاحم
+                let clean = content.replace(/\s/g, ''); 
+                clean = clean.replace(/-/g, '+').replace(/_/g, '/'); // URL Safe fix
+                
+                // دیکد کردن
+                const decoded = atob(clean);
+                
+                // جستجو در متن دیکد شده
+                const inside = decoded.match(/(vmess|vless|trojan|ss|hy2|tuic):\/\/[^\s\n]+/g);
+                if (inside && inside.length > 0) {
+                    configs.push(...inside);
+                }
+            } catch (e) {
+                // اگر ارور داد یعنی بیس64 نبوده، مهم نیست
+            }
+
+            return [...new Set(configs)]; // حذف تکراری
         }
 
-        // --- بخش 1: بررسی منابع (شمارش) ---
-        
         async function checkSelectedSources() {
             const checkedBoxes = document.querySelectorAll('.source-checkbox:checked');
             if (checkedBoxes.length === 0) return alert("منبعی انتخاب نشده!");
@@ -244,7 +240,7 @@
                 badge.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`;
                 
                 const content = await fetchContent(url);
-                const configs = smartExtract(content);
+                const configs = universalDecode(content);
                 
                 if (configs.length > 0) {
                     badge.className = "count-badge success";
@@ -265,16 +261,14 @@
             
             badge.innerHTML = `<i class="fas fa-spinner fa-spin"></i> بررسی...`;
 
-            // اگر مستقیماً کانفیگ وارد کرده باشد
             if (url.startsWith('vmess') || url.startsWith('vless')) {
                 const lines = url.split('\n').filter(l => l.includes('://'));
                 badge.innerText = `${lines.length} کانفیگ (دستی)`;
                 return;
             }
 
-            // اگر لینک باشد (دانلود نیاز دارد)
             const content = await fetchContent(url);
-            const configs = smartExtract(content);
+            const configs = universalDecode(content);
             
             if (configs.length > 0) {
                 badge.innerText = `✅ ${configs.length} کانفیگ یافت شد`;
@@ -285,17 +279,13 @@
             }
         }
 
-        // --- بخش 2: شروع تست (Main Process) ---
-
         async function startFullProcess() {
-            // جمع‌آوری تمام کانفیگ‌ها
             allFetchedConfigs = [];
             const checkedBoxes = document.querySelectorAll('.source-checkbox:checked');
             const customText = document.getElementById('customInput').value.trim();
             const limit = parseInt(document.getElementById('limitInput').value);
             const deepCheck = document.getElementById('deepCheck').checked;
 
-            // UI Reset
             document.getElementById('startBtn').classList.add('hidden');
             document.getElementById('statusArea').classList.remove('hidden');
             document.getElementById('resultsArea').classList.add('hidden');
@@ -306,31 +296,27 @@
             const status = document.getElementById('statusText');
             const pBar = document.getElementById('progressBar');
 
-            // 1. دانلود و استخراج (اگر قبلاً چک نشده باشند، الان انجام می‌شود)
             status.innerText = "در حال جمع‌آوری کانفیگ‌ها...";
             let sourcesProcessed = 0;
             
-            // افزودن دستی‌ها
             if (customText) {
                 if (customText.startsWith('http')) {
                     const content = await fetchContent(customText);
-                    allFetchedConfigs.push(...smartExtract(content));
+                    allFetchedConfigs.push(...universalDecode(content));
                 } else {
-                    allFetchedConfigs.push(...smartExtract(customText));
+                    allFetchedConfigs.push(...universalDecode(customText));
                 }
             }
 
-            // افزودن منابع انتخابی
             for (const box of checkedBoxes) {
                 const content = await fetchContent(box.value);
-                const configs = smartExtract(content);
+                const configs = universalDecode(content);
                 allFetchedConfigs.push(...configs);
                 
                 sourcesProcessed++;
                 pBar.style.width = `${(sourcesProcessed / checkedBoxes.length) * 20}%`;
             }
 
-            // حذف تکراری نهایی
             allFetchedConfigs = [...new Set(allFetchedConfigs)];
 
             if (allFetchedConfigs.length === 0) {
@@ -339,10 +325,8 @@
                 return;
             }
 
-            // 2. تست اتصال
             status.innerText = `شروع تست سرعت روی ${allFetchedConfigs.length} کانفیگ...`;
             
-            // برای سرعت، تعداد تست را محدود می‌کنیم (مثلاً 5 برابر لیمیت درخواستی)
             const maxTests = Math.min(allFetchedConfigs.length, limit * 5);
             const configsToTest = allFetchedConfigs.slice(0, maxTests);
             
@@ -363,11 +347,9 @@
                 pBar.style.width = `${percent}%`;
                 status.innerText = `تست شده: ${checked} | سالم: ${validConfigs.length}`;
 
-                // اگر به اندازه کافی کانفیگ سالم پیدا کردیم، متوقف شو
                 if (validConfigs.length >= limit * 1.2) break;
             }
 
-            // 3. نمایش
             validConfigs.sort((a, b) => a.ping - b.ping);
             validConfigs = validConfigs.slice(0, limit);
             renderResults('all');
@@ -379,18 +361,21 @@
             document.getElementById('startBtn').innerText = "شروع مجدد";
         }
 
-        // --- تابع تست اتصال (Browser Trick) ---
         async function checkConfig(config, deep) {
             const start = Date.now();
             let ip, port;
 
-            // پارس کردن کانفیگ برای پیدا کردن IP:Port
             try {
                 if (config.startsWith('vmess')) {
-                    const json = JSON.parse(atob(config.replace('vmess://', '')));
+                    // برای vmess باید دوباره بیس64 دیکد بشه تا پورت در بیاد
+                    // اما چون تابع universalDecode قبلا دیکد کرده، اینجا رشته جیسون هست؟ خیر
+                    // اینجا کانفیگ خام vmess://ey... هست.
+                    const b64 = config.replace('vmess://', '');
+                    // اینجا هم باید دیکد سیف باشه
+                    const cleanB64 = b64.replace(/-/g, '+').replace(/_/g, '/');
+                    const json = JSON.parse(atob(cleanB64));
                     ip = json.add; port = json.port;
                 } else {
-                    // VLESS / Trojan / SS
                     const match = config.match(/@([^:]+):(\d+)/) || config.match(/\/\/([^:]+):(\d+)/);
                     if (match) { ip = match[1]; port = match[2]; }
                 }
@@ -400,23 +385,16 @@
 
             try {
                 const controller = new AbortController();
-                const timeout = setTimeout(() => controller.abort(), 2000); // 2 ثانیه تایم‌اوت
-                
-                // تلاش برای فچ کردن HTTP از پورت
-                // اگر پورت باز باشد، سریع ارور Network (یا CORS) می‌دهد.
-                // اگر بسته/فیلتر باشد، Timeout (AbortError) می‌دهد.
+                const timeout = setTimeout(() => controller.abort(), 2000); 
                 await fetch(`http://${ip}:${port}`, { mode: 'no-cors', signal: controller.signal });
-                
                 clearTimeout(timeout);
                 return { alive: true, ping: Date.now() - start, config, ip, port };
             } catch (err) {
-                if (err.name === 'AbortError') return { alive: false }; // Timeout = Dead
-                // هر ارور دیگری یعنی سرور جواب داد (حتی اگر ارور داد) = Alive
+                if (err.name === 'AbortError') return { alive: false }; 
                 return { alive: true, ping: Date.now() - start, config, ip, port };
             }
         }
 
-        // --- نمایش نتایج ---
         function renderResults(filter) {
             const container = document.getElementById('cardsContainer');
             container.innerHTML = '';
@@ -448,11 +426,8 @@
             });
         }
 
-        function filterResults(type) {
-            renderResults(type);
-        }
+        function filterResults(type) { renderResults(type); }
 
-        // --- ابزارها ---
         function showQr(config) {
             config = decodeURIComponent(config);
             const modal = document.getElementById('qrModal');
@@ -476,7 +451,6 @@
             link.click();
         }
 
-        // اجرا
         renderSources();
     </script>
 </body>
