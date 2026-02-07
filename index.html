@@ -73,7 +73,7 @@
             </div>
             
             <div id="sourcesGrid" class="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto custom-scroll p-1">
-                </div>
+            </div>
         </section>
 
         <section class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-4">
@@ -140,7 +140,6 @@
     </div>
 
     <script>
-        // ✅ لیست جدید و دقیق طبق درخواست شما
         const sources = [
             { name: "AvenCores - Mirror 1", url: "https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/main/githubmirror/1.txt" },
             { name: "AvenCores - Mirror 2", url: "https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/main/githubmirror/2.txt" },
@@ -158,13 +157,10 @@
 
         let validConfigs = [];
         const LITE_SOURCE_CAP = 4;
- codex/optimize-code-performance-m1pbxh
         const BASELINE_ENDPOINTS = [
             "https://www.gstatic.com/generate_204",
             "https://cp.cloudflare.com/generate_204"
         ];
-=======
->>>>>>> main
 
         function renderSources() {
             const grid = document.getElementById('sourcesGrid');
@@ -196,10 +192,7 @@
             const limit = parseInt(document.getElementById('limitInput').value);
             const timeout = parseFloat(document.getElementById('timeoutInput').value) * 1000;
             const liteMode = document.getElementById('liteModeInput').checked;
- codex/optimize-code-performance-m1pbxh
             const pHint = document.getElementById('qualityHint');
-=======
->>>>>>> main
 
             if (selectedUrls.length === 0 && !customLinks) {
                 alert("لطفاً حداقل یک منبع انتخاب کنید!");
@@ -235,14 +228,11 @@
 
             selectedUrls = [...new Set(selectedUrls)];
 
- codex/optimize-code-performance-m1pbxh
             pText.innerText = "پروفایل شبکه شما در حال بررسی...";
             networkProfile = await profileNetwork(timeout);
             const dynamicTimeout = Math.max(timeout, Math.min(timeout * 2, networkProfile.latency * 1.5));
             pHint.innerText = `دقت تست: ${networkProfile.quality === "weak" ? "تقریبی" : "خوب"} | تاخیر پایه: ${Math.round(networkProfile.latency)}ms`;
 
-=======
->>>>>>> main
             let downloaded = 0;
             for (const url of selectedUrls) {
                 pText.innerText = `دانلود منابع (${downloaded + 1}/${selectedUrls.length})...`;
@@ -250,12 +240,8 @@
                 
                 try {
                     const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
- codex/optimize-code-performance-m1pbxh
                     const res = await fetchWithTimeout(proxyUrl, dynamicTimeout + 1500);
                     if (!res.ok) throw new Error('source failed');
-=======
-                    const res = await fetchWithTimeout(proxyUrl, timeout + 1500);
->>>>>>> main
                     const text = await res.text();
                     
                     const decoded = smartDecode(text);
@@ -277,16 +263,10 @@
             pText.innerText = `تست اتصال ${allConfigs.length} کانفیگ...`;
             
             const checkMultiplier = liteMode ? 3 : 6;
- codex/optimize-code-performance-m1pbxh
             const adaptiveMultiplier = networkProfile.quality === "weak" ? Math.max(2, checkMultiplier - 1) : checkMultiplier;
             const maxChecks = Math.min(allConfigs.length, limit * adaptiveMultiplier);
             let checked = 0;
             const batchSize = networkProfile.quality === "weak" ? 3 : (liteMode ? 4 : 10);
-=======
-            const maxChecks = Math.min(allConfigs.length, limit * checkMultiplier);
-            let checked = 0;
-            const batchSize = liteMode ? 4 : 10;
->>>>>>> main
 
             for (let i = 0; i < maxChecks; i += batchSize) {
                 const batch = allConfigs.slice(i, i + batchSize);
@@ -328,7 +308,6 @@
             return text.match(/(vmess|vless|trojan|ss|hy2|tuic):\/\/[^\s\n]+/g) || [];
         }
 
- codex/optimize-code-performance-m1pbxh
         async function profileNetwork(timeout) {
             const tests = BASELINE_ENDPOINTS.map(url => timedProbe(url, timeout));
             const results = await Promise.all(tests);
@@ -341,19 +320,6 @@
         }
 
         async function timedProbe(url, timeout) {
-=======
-        async function fetchWithTimeout(url, timeout) {
-            const controller = new AbortController();
-            const id = setTimeout(() => controller.abort(), timeout);
-            try {
-                return await fetch(url, { signal: controller.signal });
-            } finally {
-                clearTimeout(id);
-            }
-        }
-
-        async function checkConnectivity(config, timeout) {
->>>>>>> main
             const start = Date.now();
             try {
                 await fetchWithTimeout(url, timeout, { mode: 'no-cors' });
@@ -388,7 +354,6 @@
             }
         }
 
- codex/optimize-code-performance-m1pbxh
         async function checkConnectivity(config, timeout) {
             const start = Date.now();
             const endpoint = parseConfigEndpoint(config);
@@ -405,21 +370,6 @@
                     await fetchWithTimeout(url, timeout, { mode: 'no-cors' });
                     return { alive: true, ping: Date.now() - start, config };
                 } catch {}
-=======
-            try {
-                const controller = new AbortController();
-                const id = setTimeout(() => controller.abort(), timeout);
-                
-                await fetch(`http://${host}:${port}`, { 
-                    mode: 'no-cors', 
-                    signal: controller.signal 
-                });
-                
-                clearTimeout(id);
-                return { alive: true, ping: Date.now() - start, config };
-            } catch (err) {
-                return { alive: false };
->>>>>>> main
             }
 
             return { alive: false };
