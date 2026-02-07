@@ -73,7 +73,7 @@
             </div>
 
             <div id="sourcesGrid" class="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto custom-scroll p-1">
-                </div>
+            </div>
         </section>
 
         <section class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-4">
@@ -120,7 +120,11 @@
                     <h3 class="font-bold text-gray-700 text-sm">نتایج (<span id="countVal">0</span>)</h3>
                     <p id="qualityHint" class="text-[10px] text-gray-500 mt-1">دقت تست: متوسط (مرورگر فقط دسترسی پایه را می‌سنجد)</p>
                 </div>
+ codex/optimize-code-performance-zo5a3r
                 <span class="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full">امتیازدهی</span>
+
+                <span class="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full">سالم</span>
+ main
             </div>
 
             <div id="cardsContainer" class="space-y-2"></div>
@@ -156,8 +160,17 @@
             { name: "Epodonios - All", url: "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/All_Configs_Sub.txt" }
         ];
 
+ codex/optimize-code-performance-zo5a3r
         const LITE_SOURCE_CAP = 4;
         let rankedConfigs = [];
+
+        let validConfigs = [];
+        const LITE_SOURCE_CAP = 4;
+        const BASELINE_ENDPOINTS = [
+            "https://www.gstatic.com/generate_204",
+            "https://cp.cloudflare.com/generate_204"
+        ];
+ main
 
         function renderSources() {
             const grid = document.getElementById('sourcesGrid');
@@ -328,11 +341,19 @@
 
         async function startProcess() {
             let selectedUrls = Array.from(document.querySelectorAll('.source-checkbox:checked')).map(cb => cb.value);
+ codex/optimize-code-performance-zo5a3r
             const customInput = document.getElementById('customInput').value.trim();
             const limit = parseInt(document.getElementById('limitInput').value);
             const timeoutMs = parseFloat(document.getElementById('timeoutInput').value) * 1000;
             const liteMode = document.getElementById('liteModeInput').checked;
             const qualityHint = document.getElementById('qualityHint');
+
+            const customLinks = document.getElementById('customInput').value.trim();
+            const limit = parseInt(document.getElementById('limitInput').value);
+            const timeout = parseFloat(document.getElementById('timeoutInput').value) * 1000;
+            const liteMode = document.getElementById('liteModeInput').checked;
+            const pHint = document.getElementById('qualityHint');
+ main
 
             if (!selectedUrls.length && !customInput) {
                 alert('حداقل یک منبع یا کانفیگ دستی وارد کنید.');
@@ -348,6 +369,7 @@
             document.getElementById('resultsArea').classList.add('hidden');
             document.getElementById('actionBar').classList.add('hidden');
             document.getElementById('cardsContainer').innerHTML = '';
+ codex/optimize-code-performance-zo5a3r
             rankedConfigs = [];
 
             setProgress('بررسی کیفیت اینترنت شما...', 3);
@@ -361,9 +383,28 @@
                     if (line.startsWith('http')) selectedUrls.push(line);
                     else if (/^(vmess|vless|trojan|ss|hy2|tuic):\/\//i.test(line)) allConfigs.push(line);
                 }
+
+            validConfigs = [];
+
+            const pBar = document.getElementById('progressBar');
+            const pText = document.getElementById('statusText');
+
+            let allConfigs = [];
+            let networkProfile = { latency: timeout, quality: "normal" };
+
+            if (customLinks) {
+                const lines = customLinks.split('\n');
+                lines.forEach(line => {
+                    const clean = line.trim();
+                    if (!clean) return;
+                    if (clean.startsWith('http')) selectedUrls.push(clean);
+                    else if (clean.match(/^(vmess|vless|trojan|ss|hy2)/)) allConfigs.push(clean);
+                });
+ main
             }
             selectedUrls = [...new Set(selectedUrls)];
 
+ codex/optimize-code-performance-zo5a3r
             let done = 0;
             for (const url of selectedUrls) {
                 setProgress(`دانلود منابع (${done + 1}/${selectedUrls.length})...`, 5 + ((done + 1) / Math.max(1, selectedUrls.length)) * 35);
@@ -378,11 +419,43 @@
             const uniqueConfigs = [...new Set(allConfigs.map(c => c.trim()).filter(Boolean))];
             if (!uniqueConfigs.length) {
                 alert('هیچ کانفیگی استخراج نشد. احتمالاً منابع در دسترس نیستند یا فرمت ناسازگار است.');
+
+            selectedUrls = [...new Set(selectedUrls)];
+
+            pText.innerText = "پروفایل شبکه شما در حال بررسی...";
+            networkProfile = await profileNetwork(timeout);
+            const dynamicTimeout = Math.max(timeout, Math.min(timeout * 2, networkProfile.latency * 1.5));
+            pHint.innerText = `دقت تست: ${networkProfile.quality === "weak" ? "تقریبی" : "خوب"} | تاخیر پایه: ${Math.round(networkProfile.latency)}ms`;
+
+            let downloaded = 0;
+            for (const url of selectedUrls) {
+                pText.innerText = `دانلود منابع (${downloaded + 1}/${selectedUrls.length})...`;
+                pBar.style.width = `${((downloaded + 1) / selectedUrls.length) * 30}%`;
+                
+                try {
+                    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+                    const res = await fetchWithTimeout(proxyUrl, dynamicTimeout + 1500);
+                    if (!res.ok) throw new Error('source failed');
+                    const text = await res.text();
+                    
+                    const decoded = smartDecode(text);
+                    const extracted = extractConfigs(decoded);
+                    allConfigs.push(...extracted);
+                } catch (e) { console.log(e); }
+                downloaded++;
+            }
+
+            allConfigs = [...new Set(allConfigs)];
+            
+            if (allConfigs.length === 0) {
+                alert("هیچ کانفیگی یافت نشد! (شاید منابع در دسترس نیستند)");
+               main
                 document.getElementById('statusArea').classList.add('hidden');
                 document.getElementById('startBtn').classList.remove('hidden');
                 return;
             }
 
+ codex/optimize-code-performance-zo5a3r
             const parsed = uniqueConfigs.map(config => ({ config, endpoint: parseEndpoint(config) }))
                 .filter(item => item.endpoint && item.endpoint.host && Number.isFinite(item.endpoint.port));
 
@@ -393,12 +466,27 @@
                 return;
             }
 
+            pText.innerText = `تست اتصال ${allConfigs.length} کانفیگ...`;
+            
+            const checkMultiplier = liteMode ? 3 : 6;
+            const adaptiveMultiplier = networkProfile.quality === "weak" ? Math.max(2, checkMultiplier - 1) : checkMultiplier;
+            const maxChecks = Math.min(allConfigs.length, limit * adaptiveMultiplier);
+            let checked = 0;
+            const batchSize = networkProfile.quality === "weak" ? 3 : (liteMode ? 4 : 10);
+
+            for (let i = 0; i < maxChecks; i += batchSize) {
+                const batch = allConfigs.slice(i, i + batchSize);
+                const promises = batch.map(conf => checkConnectivity(conf, dynamicTimeout));
+                const results = await Promise.all(promises);
+             main
+
             const endpointMap = new Map();
             for (const item of parsed) {
                 endpointMap.set(endpointKey(item.endpoint), item.endpoint);
             }
             const endpoints = Array.from(endpointMap.values());
 
+ codex/optimize-code-performance-zo5a3r
             const maxEndpointChecks = Math.min(endpoints.length, liteMode ? limit * 3 : limit * 6);
             const batchSize = baseline.quality === 'weak' ? 3 : (liteMode ? 5 : 12);
 
@@ -413,6 +501,14 @@
                 const progress = 40 + (checked / maxEndpointChecks) * 55;
                 const aliveCount = Array.from(probeResults.values()).filter(v => v.alive).length;
                 setProgress(`تحلیل endpoint: ${checked}/${maxEndpointChecks} | قابل دسترس: ${aliveCount}`, progress);
+
+                checked += batch.length;
+                const progress = 30 + ((checked / maxChecks) * 70);
+                pBar.style.width = `${progress}%`;
+                pText.innerText = `تست: ${checked} | سالم: ${validConfigs.length} | وضعیت: ${networkProfile.quality === "weak" ? "اینترنت ضعیف" : "نرمال"}`;
+
+                if (validConfigs.length >= (liteMode ? limit : limit * 1.5)) break;
+ main
             }
 
             rankedConfigs = parsed.map(item => {
@@ -435,7 +531,90 @@
             document.getElementById('resultsArea').classList.remove('hidden');
             document.getElementById('actionBar').classList.remove('hidden');
             document.getElementById('startBtn').classList.remove('hidden');
+ codex/optimize-code-performance-zo5a3r
             document.getElementById('startBtn').innerHTML = `<i class="fas fa-redo"></i> تحلیل مجدد`;
+
+            document.getElementById('startBtn').innerHTML = `<i class="fas fa-redo"></i> تست مجدد`;
+        }
+
+        function smartDecode(str) {
+            try {
+                str = str.trim();
+                if (str.includes('vmess://') || str.includes('vless://')) return str;
+                return atob(str.replace(/-/g, '+').replace(/_/g, '/').replace(/\s/g, ''));
+            } catch { return str; }
+        }
+
+        function extractConfigs(text) {
+            return text.match(/(vmess|vless|trojan|ss|hy2|tuic):\/\/[^\s\n]+/g) || [];
+        }
+
+        async function profileNetwork(timeout) {
+            const tests = BASELINE_ENDPOINTS.map(url => timedProbe(url, timeout));
+            const results = await Promise.all(tests);
+            const alive = results.filter(Boolean);
+            if (!alive.length) return { latency: timeout * 1.2, quality: "weak" };
+
+            const avg = alive.reduce((acc, val) => acc + val, 0) / alive.length;
+            const quality = avg > 1200 ? "weak" : "normal";
+            return { latency: avg, quality };
+        }
+
+        async function timedProbe(url, timeout) {
+            const start = Date.now();
+            try {
+                await fetchWithTimeout(url, timeout, { mode: 'no-cors' });
+                return Date.now() - start;
+            } catch {
+                return null;
+            }
+        }
+
+        async function fetchWithTimeout(url, timeout, options = {}) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeout);
+            try {
+                return await fetch(url, { ...options, signal: controller.signal });
+            } finally {
+                clearTimeout(id);
+            }
+        }
+
+        function parseConfigEndpoint(config) {
+            try {
+                if (config.startsWith('vmess://')) {
+                    const json = JSON.parse(smartDecode(config.replace('vmess://', '')));
+                    return { host: json.add, port: parseInt(json.port || 80) };
+                }
+
+                const match = config.match(/@([^:#?]+):(\d+)/) || config.match(/\/\/([^:#?]+):(\d+)/);
+                if (!match) return null;
+                return { host: match[1], port: parseInt(match[2]) };
+            } catch {
+                return null;
+            }
+        }
+
+        async function checkConnectivity(config, timeout) {
+            const start = Date.now();
+            const endpoint = parseConfigEndpoint(config);
+            if (!endpoint || !endpoint.host) return { alive: false };
+
+            const { host, port } = endpoint;
+            const preferHttps = [443, 8443, 2053, 2083].includes(port);
+            const probes = preferHttps
+                ? [`https://${host}:${port}`, `http://${host}:${port}`]
+                : [`http://${host}:${port}`, `https://${host}:${port}`];
+
+            for (const url of probes) {
+                try {
+                    await fetchWithTimeout(url, timeout, { mode: 'no-cors' });
+                    return { alive: true, ping: Date.now() - start, config };
+                } catch {}
+            }
+
+            return { alive: false };
+ main
         }
 
         function renderResults() {
