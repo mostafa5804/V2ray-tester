@@ -340,6 +340,10 @@
             }
         }
 
+        function isTimeoutError(error) {
+            return error?.name === 'AbortError';
+        }
+
         function parseConfigEndpoint(config) {
             try {
                 if (config.startsWith('vmess://')) {
@@ -370,7 +374,11 @@
                 try {
                     await fetchWithTimeout(url, timeout, { mode: 'no-cors' });
                     return { alive: true, ping: Date.now() - start, config };
-                } catch {}
+                } catch (error) {
+                    if (!isTimeoutError(error)) {
+                        return { alive: true, ping: Date.now() - start, config };
+                    }
+                }
             }
 
             return { alive: false };
