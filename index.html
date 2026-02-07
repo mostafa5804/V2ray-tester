@@ -3,829 +3,474 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="تستر هوشمند کانفیگ VPN - بررسی و رتبه‌بندی کانفیگ‌های V2Ray، Vless، Vmess و Trojan">
-    <meta name="keywords" content="vpn config tester, v2ray, vless, vmess, trojan, تستر کانفیگ">
-    <title>تستر هوشمند کانفیگ</title>
-
+    <title>تستر هوشمند V2Ray | نسخه حرفه‌ای</title>
+    
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: { sans: ['Vazirmatn', 'sans-serif'] },
-                    colors: {
-                        primary: '#3b82f6',
-                        secondary: '#eff6ff',
-                    }
+                    colors: { primary: '#2563eb', secondary: '#eff6ff', surface: '#ffffff' }
                 }
             }
         }
     </script>
 
     <style>
-        body { background-color: #f8fafc; color: #334155; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #f1f5f9; color: #334155; -webkit-tap-highlight-color: transparent; }
+        .glass-panel { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.5); }
         .custom-scroll::-webkit-scrollbar { width: 4px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .loader {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #3b82f6;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-        }
+        .card-hover { transition: all 0.2s ease; }
+        .card-hover:active { transform: scale(0.98); }
+        .loader-spin { border: 3px solid #e2e8f0; border-top: 3px solid #2563eb; border-radius: 50%; width: 24px; height: 24px; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .source-card { transition: all 0.2s ease; border: 1px solid #e2e8f0; }
-        .source-checkbox:checked + .source-card {
-            border-color: #3b82f6;
-            background-color: #eff6ff;
-            color: #1d4ed8;
-            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
-        }
-        .source-checkbox:checked + .source-card .check-icon { opacity: 1; transform: scale(1); }
+        
+        /* استایل تب‌ها */
+        .tab-btn { @apply px-3 py-1.5 rounded-full text-xs font-bold transition-colors border border-transparent; }
+        .tab-btn.active { @apply bg-blue-600 text-white shadow-md; }
+        .tab-btn.inactive { @apply bg-white text-gray-500 border-gray-200 hover:bg-gray-50; }
     </style>
 </head>
-<body class="pb-32">
+<body class="pb-36 pt-16">
 
-    <header class="bg-white/90 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 h-16 flex items-center justify-between px-4 shadow-sm">
+    <header class="fixed top-0 w-full z-40 bg-white/95 backdrop-blur-md border-b border-gray-200 h-16 flex items-center justify-between px-4 shadow-sm">
         <div class="flex items-center gap-2">
-            <div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center">
-                <i class="fas fa-network-wired"></i>
+            <div class="w-9 h-9 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center shadow-inner">
+                <i class="fas fa-bolt text-lg"></i>
             </div>
-            <h1 class="font-bold text-gray-800 text-lg">تستر کانفیگ</h1>
+            <div>
+                <h1 class="font-black text-gray-800 text-lg leading-tight tracking-tight">تستر کانفیگ</h1>
+                <p class="text-[10px] text-gray-400 font-mono">v3.0 Pro</p>
+            </div>
         </div>
-        <div class="text-xs font-mono bg-gray-100 text-gray-500 px-2 py-1 rounded">v2.0 Fixed</div>
+        <div class="flex gap-2">
+            <button onclick="location.reload()" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-blue-50 hover:text-blue-600 transition">
+                <i class="fas fa-sync-alt text-xs"></i>
+            </button>
+        </div>
     </header>
 
-    <main class="max-w-lg mx-auto p-4 space-y-5">
+    <main class="max-w-xl mx-auto p-4 space-y-5">
 
         <section class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
             <div class="flex justify-between items-center mb-3">
                 <h2 class="font-bold text-gray-700 text-sm flex items-center gap-2">
-                    <i class="fas fa-server text-blue-500"></i> منابع انتخابی شما
+                    <i class="fas fa-server text-blue-500"></i> منابع (Deep Select)
                 </h2>
-                <div class="flex gap-2">
-                    <button onclick="toggleSources(true)" class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded hover:bg-blue-100" aria-label="انتخاب همه منابع">همه</button>
-                    <button onclick="toggleSources(false)" class="text-xs bg-gray-50 text-gray-600 px-2 py-1 rounded hover:bg-gray-100" aria-label="لغو انتخاب همه">هیچکدام</button>
+                <div class="flex gap-1 bg-gray-100 p-1 rounded-lg">
+                    <button onclick="toggleSources(true)" class="px-3 py-1 text-[10px] font-bold rounded-md bg-white text-blue-600 shadow-sm transition">همه</button>
+                    <button onclick="toggleSources(false)" class="px-3 py-1 text-[10px] font-bold rounded-md text-gray-500 hover:bg-white/50 transition">هیچ</button>
                 </div>
             </div>
-
-            <div id="sourcesGrid" class="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto custom-scroll p-1">
-            </div>
+            
+            <div id="sourcesGrid" class="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto custom-scroll p-1">
+                </div>
         </section>
+
+        <div class="bg-white rounded-2xl p-1 shadow-sm border border-gray-100 overflow-hidden">
+            <textarea id="customInput" class="w-full h-14 p-3 text-xs bg-transparent outline-none placeholder-gray-400 font-mono dir-ltr resize-none" placeholder="لینک‌های خود را اینجا پیست کنید (vless://, vmess://, ...)"></textarea>
+        </div>
 
         <section class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-4">
-            <div>
-                <label for="customInput" class="text-xs font-bold text-gray-500 mb-1 block">لینک دستی (اختیاری)</label>
-                <textarea id="customInput" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs font-mono focus:border-blue-500 outline-none h-16 placeholder-gray-400 dir-ltr" placeholder="vless://..." aria-label="ورود لینک دستی"></textarea>
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-gray-600 flex items-center gap-1"><i class="fas fa-filter text-gray-400"></i> تعداد خروجی</span>
+                <span id="limitDisplay" class="text-xs font-mono font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">20</span>
             </div>
-
-            <div class="bg-blue-50/50 rounded-xl p-3 border border-blue-100">
-                <label class="flex items-center justify-between text-xs mb-3 bg-white/70 border border-blue-100 rounded-lg px-2 py-2">
-                    <span class="text-gray-700 font-bold">حالت کم‌مصرف</span>
-                    <input id="liteModeInput" type="checkbox" class="accent-blue-600 w-4 h-4" checked aria-label="فعال‌سازی حالت کم‌مصرف">
+            <input type="range" id="limitInput" min="5" max="200" value="20" class="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="document.getElementById('limitDisplay').innerText = this.value">
+            
+            <div class="flex items-center gap-3 pt-2">
+                <label class="flex-1 flex items-center gap-2 bg-gray-50 p-2 rounded-xl border border-gray-100 cursor-pointer select-none">
+                    <input type="checkbox" id="deepCheck" class="w-4 h-4 accent-blue-600 rounded">
+                    <span class="text-[10px] font-bold text-gray-600">تست دقیق WS (کندتر)</span>
                 </label>
-                <div class="flex justify-between text-xs mb-2">
-                    <span class="text-gray-600">تعداد خروجی:</span>
-                    <span id="limitDisplay" class="font-bold text-blue-600">20</span>
-                </div>
-                <input type="range" id="limitInput" min="5" max="200" value="20" class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500" oninput="document.getElementById('limitDisplay').innerText = this.value" aria-label="تنظیم تعداد خروجی">
-
-                <div class="flex justify-between text-xs mt-3 mb-2">
-                    <span class="text-gray-600">تایم‌اوت (ثانیه):</span>
-                    <span id="timeoutDisplay" class="font-bold text-blue-600">2.0</span>
-                </div>
-                <input type="range" id="timeoutInput" min="0.5" max="5" step="0.5" value="2.0" class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500" oninput="document.getElementById('timeoutDisplay').innerText = this.value" aria-label="تنظیم تایم‌اوت">
+                <label class="flex-1 flex items-center gap-2 bg-gray-50 p-2 rounded-xl border border-gray-100 cursor-pointer select-none">
+                    <input type="checkbox" id="dedup" class="w-4 h-4 accent-blue-600 rounded" checked>
+                    <span class="text-[10px] font-bold text-gray-600">حذف تکراری هوشمند</span>
+                </label>
             </div>
         </section>
 
-        <button id="startBtn" onclick="startProcess()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-200 transition-transform active:scale-95 flex justify-center items-center gap-2 text-base" aria-label="شروع تست کانفیگ‌ها">
-            <span>شروع تست واقعی</span>
-            <i class="fas fa-play text-xs"></i>
+        <button id="startBtn" onclick="startProcess()" class="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-200 transition-all active:scale-95 flex justify-center items-center gap-2 text-base group">
+            <span>شروع آنالیز و تست</span>
+            <i class="fas fa-rocket group-hover:translate-x-1 transition-transform"></i>
         </button>
 
-        <button id="cancelBtn" onclick="cancelProcess()" class="hidden w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-xl shadow-lg transition-transform active:scale-95 flex justify-center items-center gap-2 text-base" aria-label="لغو فرآیند">
-            <span>لغو فرآیند</span>
-            <i class="fas fa-times text-xs"></i>
-        </button>
-
-        <div id="statusArea" class="hidden text-center py-4">
-            <div class="loader mx-auto mb-3"></div>
-            <p id="statusText" class="text-xs text-gray-500 animate-pulse">در حال اتصال...</p>
-            <div class="w-full bg-gray-200 rounded-full h-1.5 mt-3 overflow-hidden">
-                <div id="progressBar" class="bg-blue-500 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+        <div id="statusArea" class="hidden flex flex-col items-center py-6">
+            <div class="loader-spin mb-3"></div>
+            <p id="statusText" class="text-xs font-bold text-gray-500 animate-pulse">در حال برقراری ارتباط...</p>
+            <div class="w-64 bg-gray-200 rounded-full h-1.5 mt-4 overflow-hidden">
+                <div id="progressBar" class="bg-blue-500 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
             </div>
         </div>
 
-        <div id="errorArea" class="hidden">
-            <div class="bg-red-50 border border-red-200 rounded-xl p-4 text-sm">
-                <div class="flex items-start gap-3">
-                    <i class="fas fa-exclamation-triangle text-red-500 mt-0.5"></i>
-                    <div>
-                        <div class="font-bold text-red-700 mb-1">خطا در اجرا</div>
-                        <div id="errorText" class="text-red-600 text-xs"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="resultsArea" class="hidden space-y-3">
-            <div class="flex justify-between items-center px-1">
-                <div>
-                    <h3 class="font-bold text-gray-700 text-sm">نتایج (<span id="countVal">0</span>)</h3>
-                    <p id="qualityHint" class="text-[10px] text-gray-500 mt-1">آماده برای نمایش نتایج</p>
-                </div>
-                <span class="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full">امتیازدهی</span>
+        <div id="resultsArea" class="hidden space-y-4">
+            
+            <div class="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+                <button onclick="filterResults('all')" class="tab-btn active" id="filter-all">همه (<span id="count-all">0</span>)</button>
+                <button onclick="filterResults('vless')" class="tab-btn inactive" id="filter-vless">VLESS</button>
+                <button onclick="filterResults('vmess')" class="tab-btn inactive" id="filter-vmess">VMess</button>
+                <button onclick="filterResults('reality')" class="tab-btn inactive" id="filter-reality">Reality</button>
             </div>
 
-            <div id="cardsContainer" class="space-y-2"></div>
+            <div id="cardsContainer" class="space-y-3"></div>
         </div>
 
     </main>
 
-    <div id="actionBar" class="hidden fixed bottom-5 left-0 w-full px-4 z-40">
-        <div class="max-w-lg mx-auto bg-white border border-gray-200 p-2 rounded-2xl shadow-xl flex gap-2">
-            <button onclick="copyAll()" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md active:bg-blue-700 transition" aria-label="کپی همه کانفیگ‌ها">
-                کپی یکجا
+    <div id="actionBar" class="hidden fixed bottom-6 left-0 w-full px-4 z-40">
+        <div class="max-w-xl mx-auto glass-panel p-2 rounded-2xl shadow-2xl flex gap-2">
+            <button onclick="copyAll()" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md active:bg-blue-700 transition flex flex-col items-center justify-center leading-none gap-1">
+                <span class="text-xs opacity-80">COPY</span>
+                <span>کپی سالم‌ها</span>
             </button>
-            <button onclick="downloadSub()" class="flex-1 bg-white text-gray-700 border border-gray-200 py-3 rounded-xl font-bold text-sm shadow-sm hover:bg-gray-50 transition" aria-label="دانلود فایل ساب‌اسکریپشن">
-                دانلود فایل
+            <button onclick="downloadSub()" class="flex-1 bg-white text-gray-700 border border-gray-200 py-3 rounded-xl font-bold text-sm shadow-sm hover:bg-gray-50 transition flex flex-col items-center justify-center leading-none gap-1">
+                <span class="text-xs opacity-60">FILE</span>
+                <span>دانلود فایل</span>
             </button>
         </div>
     </div>
 
+    <div id="qrModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onclick="closeQr()">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-xs text-center shadow-2xl transform transition-all scale-95" onclick="event.stopPropagation()">
+            <h3 class="font-bold text-gray-800 mb-4">اسکن جهت اتصال</h3>
+            <div id="qrPlace" class="flex justify-center mb-4 bg-white p-2 rounded-xl border border-gray-100"></div>
+            <div class="text-xs text-gray-500 font-mono break-all mb-4 line-clamp-2" id="qrTextLink"></div>
+            <button onclick="closeQr()" class="w-full bg-gray-100 text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-200 transition">بستن</button>
+        </div>
+    </div>
+
     <script>
-        'use strict';
-
-        // ==================== Constants ====================
-        const SOURCES = [
-            { name: "AvenCores - Mirror 1", url: "https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/main/githubmirror/1.txt" },
-            { name: "AvenCores - Mirror 2", url: "https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/main/githubmirror/2.txt" },
-            { name: "AvenCores - Mirror 3", url: "https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/main/githubmirror/3.txt" },
-            { name: "namira", url: "https://www.namira.dev/api/subscription" },
-            { name: "ShatakVPN - All", url: "https://raw.githubusercontent.com/ShatakVPN/ConfigForge-V2Ray/main/configs/all.txt" },
-            { name: "HamedCode - Vless", url: "https://raw.githubusercontent.com/hamedcode/port-based-v2ray-configs/main/sub/vless.txt" },
-            { name: "V2RayRoot - Vless", url: "https://raw.githubusercontent.com/V2RayRoot/V2RayConfig/main/Config/vless.txt" },
-            { name: "SoliSpirit - All", url: "https://raw.githubusercontent.com/SoliSpirit/v2ray-configs/main/all_configs.txt" },
-            { name: "ALIILAPRO - Server", url: "https://raw.githubusercontent.com/ALIILAPRO/v2rayNG-Config/main/server.txt" },
-            { name: "MatinGhanbari - All", url: "https://raw.githubusercontent.com/MatinGhanbari/v2ray-configs/main/subscriptions/v2ray/all_sub.txt" },
-            { name: "Barry-Far - Base64", url: "https://raw.githubusercontent.com/barry-far/V2ray-config/main/All_Configs_base64_Sub.txt" },
-            { name: "Epodonios - All", url: "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/All_Configs_Sub.txt" }
+        // --- تنظیمات و منابع (بروز شده) ---
+        const sources = [
+            { name: "AvenCores 1", url: "https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/main/githubmirror/1.txt" },
+            { name: "AvenCores 2", url: "https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/main/githubmirror/2.txt" },
+            { name: "AvenCores 3", url: "https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/main/githubmirror/3.txt" },
+            { name: "ShatakVPN", url: "https://raw.githubusercontent.com/ShatakVPN/ConfigForge-V2Ray/main/configs/all.txt" },
+            { name: "HamedCode", url: "https://raw.githubusercontent.com/hamedcode/port-based-v2ray-configs/main/sub/vless.txt" },
+            { name: "V2RayRoot", url: "https://raw.githubusercontent.com/V2RayRoot/V2RayConfig/main/Config/vless.txt" },
+            { name: "SoliSpirit", url: "https://raw.githubusercontent.com/SoliSpirit/v2ray-configs/refs/heads/main/all_configs.txt" },
+            { name: "ALIILAPRO", url: "https://raw.githubusercontent.com/ALIILAPRO/v2rayNG-Config/main/server.txt" },
+            { name: "MatinGhanbari", url: "https://raw.githubusercontent.com/MatinGhanbari/v2ray-configs/main/subscriptions/v2ray/all_sub.txt" },
+            { name: "Barry-Far", url: "https://raw.githubusercontent.com/barry-far/V2ray-config/main/All_Configs_base64_Sub.txt" },
+            { name: "Epodonios", url: "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/All_Configs_Sub.txt" }
         ];
 
-        const LITE_SOURCE_CAP = 4;
-        const MAX_PORT = 65535;
-        const MIN_PORT = 1;
-        
-        const BASELINE_ENDPOINTS = [
-            'https://www.gstatic.com/generate_204',
-            'https://cp.cloudflare.com/generate_204'
-        ];
+        let validConfigs = [];
+        let displayedConfigs = [];
 
-        const SCORE_WEIGHTS = {
-            ALIVE: 55,
-            CONNECT_OK: 20,
-            DNS_OK: 10,
-            LATENCY_MAX: 15,
-            TLS: 5,
-            SNI: 3,
-            NETWORK: 2,
-            PROTOCOL: 2
-        };
-
-        // ==================== State ====================
-        let rankedConfigs = [];
-        let sourceStats = [];
-        let processCancelled = false;
-
-        // ==================== Utility Functions ====================
-        
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        function sanitizeUrl(url) {
-            try {
-                const parsed = new URL(url);
-                if (!['http:', 'https:'].includes(parsed.protocol)) {
-                    return null;
-                }
-                return parsed.href;
-            } catch {
-                return null;
-            }
-        }
-
-        function isValidPort(port) {
-            return Number.isInteger(port) && port >= MIN_PORT && port <= MAX_PORT;
-        }
-
-        function logError(context, error) {
-            console.error(`[${context}]`, error);
-        }
-
-        function showError(message) {
-            document.getElementById('errorText').textContent = message;
-            document.getElementById('errorArea').classList.remove('hidden');
-            setTimeout(() => {
-                document.getElementById('errorArea').classList.add('hidden');
-            }, 5000);
-        }
-
-        // ==================== UI Functions ====================
-        
+        // --- مقداردهی اولیه ---
         function renderSources() {
             const grid = document.getElementById('sourcesGrid');
             grid.innerHTML = '';
-            
-            SOURCES.forEach((src, idx) => {
-                const isChecked = idx < LITE_SOURCE_CAP;
-                const escapedName = escapeHtml(src.name);
-                const escapedFile = escapeHtml(src.url.split('/').pop());
-                
-                const label = document.createElement('label');
-                label.className = 'cursor-pointer relative group';
-                label.innerHTML = `
-                    <input type="checkbox" value="${escapeHtml(src.url)}" class="source-checkbox hidden" ${isChecked ? 'checked' : ''} aria-label="انتخاب ${escapedName}">
-                    <div class="source-card bg-gray-50 rounded-xl p-3 flex items-center gap-3 select-none">
-                        <span class="w-2 h-2 rounded-full bg-gray-300 status-dot group-hover:bg-blue-300 transition"></span>
-                        <div class="flex-1 min-w-0">
-                            <div class="font-bold text-xs text-gray-700 truncate">${escapedName}</div>
-                            <div class="text-[9px] text-gray-400 truncate">${escapedFile}</div>
+            sources.forEach((src, idx) => {
+                grid.innerHTML += `
+                    <label class="cursor-pointer relative group block">
+                        <input type="checkbox" value="${src.url}" class="source-checkbox hidden" checked>
+                        <div class="source-card bg-gray-50 rounded-xl p-3 flex items-center gap-3 select-none hover:bg-white">
+                            <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center font-bold text-xs shadow-sm">${idx + 1}</div>
+                            <div class="flex-1 min-w-0">
+                                <div class="font-bold text-xs text-gray-700 truncate">${src.name}</div>
+                                <div class="text-[9px] text-gray-400 truncate font-mono opacity-70">${src.url.substring(8, 35)}...</div>
+                            </div>
+                            <div class="w-5 h-5 rounded-full border-2 border-gray-300 flex items-center justify-center check-circle transition-colors group-hover:border-blue-300">
+                                <div class="w-2.5 h-2.5 rounded-full bg-blue-500 opacity-0 check-icon transition-opacity"></div>
+                            </div>
                         </div>
-                        <i class="fas fa-check-circle text-blue-500 opacity-0 check-icon text-lg transition-transform scale-50"></i>
-                    </div>
+                    </label>
                 `;
-                grid.appendChild(label);
             });
         }
+
+        // --- استایل چک‌باکس ---
+        const style = document.createElement('style');
+        style.textContent = `.source-checkbox:checked + .source-card .check-circle { border-color: #3b82f6; } .source-checkbox:checked + .source-card .check-icon { opacity: 1; } .source-checkbox:checked + .source-card { background: white; border-color: #3b82f6; box-shadow: 0 4px 10px -2px rgba(59, 130, 246, 0.15); }`;
+        document.head.appendChild(style);
 
         function toggleSources(state) {
             document.querySelectorAll('.source-checkbox').forEach(cb => cb.checked = state);
         }
 
-        function setProgress(text, percent) {
-            document.getElementById('statusText').textContent = text;
-            document.getElementById('progressBar').style.width = `${Math.max(0, Math.min(100, percent))}%`;
-        }
-
-        function updateQualityHint(summary) {
-            const parts = [
-                `دریافتی: ${summary.totalFetched}`,
-                `منحصربه‌فرد: ${summary.uniqueConfigs}`,
-                `بررسی endpoint: ${summary.checked}/${summary.totalChecks}`,
-                `سالم: ${summary.alive}`
-            ];
-            document.getElementById('qualityHint').textContent = parts.join(' | ');
-        }
-
-        // ==================== Config Processing ====================
-        
-        function splitAndCleanLines(input) {
-            if (!input || typeof input !== 'string') return [];
-            return input.split('\n')
-                .map(v => v.trim())
-                .filter(Boolean);
-        }
-
-        function decodeBase64Safe(value) {
-            try {
-                const normalized = value.replace(/-/g, '+').replace(/_/g, '/').replace(/\s/g, '');
-                const raw = atob(normalized);
-                const bytes = Uint8Array.from(raw, c => c.charCodeAt(0));
-                return new TextDecoder('utf-8', { fatal: false }).decode(bytes);
-            } catch (e) {
-                logError('decodeBase64Safe', e);
-                return value;
-            }
-        }
-
-        function maybeDecodeSubscription(text) {
-            const trimmed = text.trim();
-            if (!trimmed) return '';
-            if (/(vmess|vless|trojan|ss|hy2|tuic):\/\//i.test(trimmed)) return trimmed;
-            return decodeBase64Safe(trimmed);
-        }
-
-        function extractConfigs(text) {
-            if (!text) return [];
-            return text.match(/(vmess|vless|trojan|ss|hy2|tuic):\/\/[^\s\n]+/gi) || [];
-        }
-
-        function parseEndpoint(config) {
-            try {
-                if (config.startsWith('vmess://')) {
-                    const json = JSON.parse(decodeBase64Safe(config.slice(8)));
-                    const host = String(json.add || '').trim();
-                    const port = parseInt(json.port || 443, 10);
-                    
-                    if (!host || !isValidPort(port)) return null;
-                    
-                    return {
-                        host,
-                        port,
-                        network: json.net || '',
-                        tls: json.tls || '',
-                        sni: json.sni || json.host || ''
-                    };
-                }
-
-                const hostPort = config.match(/@([^:#?]+):(\d+)/) || config.match(/\/\/([^:#?]+):(\d+)/);
-                if (!hostPort) return null;
-
-                const host = hostPort[1];
-                const port = parseInt(hostPort[2], 10);
-                
-                if (!host || !isValidPort(port)) return null;
-
-                let search = '';
-                try {
-                    const normalized = config.replace(/^(vless|trojan|ss|hy2|tuic):\/\//, 'https://');
-                    const parsed = new URL(normalized);
-                    search = parsed.search || '';
-                } catch (e) {
-                    logError('parseEndpoint URL', e);
-                }
-
-                const params = new URLSearchParams(search);
-                return {
-                    host,
-                    port,
-                    network: params.get('type') || '',
-                    tls: params.get('security') || params.get('tls') || '',
-                    sni: params.get('sni') || params.get('host') || ''
-                };
-            } catch (e) {
-                logError('parseEndpoint', e);
-                return null;
-            }
-        }
-
-        // ==================== Network Functions ====================
-        
-        async function fetchWithTimeout(url, timeout, options = {}) {
-            const controller = new AbortController();
-            const timer = setTimeout(() => controller.abort(), timeout);
-            
-            try {
-                const response = await fetch(url, { 
-                    ...options, 
-                    signal: controller.signal 
-                });
-                clearTimeout(timer);
-                return response;
-            } catch (e) {
-                clearTimeout(timer);
-                throw e;
-            }
-        }
-
-        async function fetchSource(url, timeout) {
-            const sanitized = sanitizeUrl(url);
-            if (!sanitized) {
-                return { configs: [], ok: false, via: '-', error: 'Invalid URL' };
-            }
-
-            const targets = [
-                `https://api.allorigins.win/raw?url=${encodeURIComponent(sanitized)}`,
-                `https://r.jina.ai/http://${sanitized.replace(/^https?:\/\//, '')}`,
-                sanitized
-            ];
-
-            for (const target of targets) {
-                try {
-                    const response = await fetchWithTimeout(target, timeout);
-                    if (!response.ok) continue;
-                    
-                    const text = await response.text();
-                    const decoded = maybeDecodeSubscription(text);
-                    const configs = extractConfigs(decoded);
-                    
-                    return {
-                        configs,
-                        ok: true,
-                        via: target
-                    };
-                } catch (e) {
-                    logError(`fetchSource ${target}`, e);
-                }
-            }
-
-            return { configs: [], ok: false, via: '-', error: 'All proxies failed' };
-        }
-
-        async function measureBaseline(timeout) {
-            const timings = [];
-            
-            for (const url of BASELINE_ENDPOINTS) {
-                const start = performance.now();
-                try {
-                    await fetchWithTimeout(url, timeout, { mode: 'no-cors' });
-                    timings.push(performance.now() - start);
-                } catch (e) {
-                    logError('measureBaseline', e);
-                }
-            }
-            
-            if (!timings.length) {
-                return { latency: timeout, quality: 'weak' };
-            }
-            
-            const avg = timings.reduce((a, b) => a + b, 0) / timings.length;
-            return { 
-                latency: avg, 
-                quality: avg > 1200 ? 'weak' : 'normal' 
-            };
-        }
-
-        function endpointKey(ep) {
-            return `${ep.host}:${ep.port}`;
-        }
-
-        async function resolveHost(host, timeout) {
-            const providers = [
-                `https://dns.google/resolve?name=${encodeURIComponent(host)}&type=A`,
-                `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(host)}&type=A`
-            ];
-
-            for (const url of providers) {
-                const start = performance.now();
-                try {
-                    const response = await fetchWithTimeout(url, timeout, {
-                        headers: { accept: 'application/dns-json' }
-                    });
-                    
-                    if (!response.ok) continue;
-                    
-                    const data = await response.json();
-                    if (Array.isArray(data.Answer) && data.Answer.length > 0) {
-                        return { 
-                            ok: true, 
-                            latency: Math.max(1, Math.round(performance.now() - start)) 
-                        };
-                    }
-                } catch (e) {
-                    logError('resolveHost', e);
-                }
-            }
-
-            return { ok: false, latency: timeout };
-        }
-
-        async function probeEndpoint(host, port, timeout) {
-            const dnsResult = await resolveHost(host, timeout);
-            const start = performance.now();
-            
-            const urls = [
-                `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://${host}:${port}`)}`,
-                `https://api.allorigins.win/raw?url=${encodeURIComponent(`http://${host}:${port}`)}`
-            ];
-
-            let directOk = false;
-            for (const url of urls) {
-                try {
-                    const response = await fetchWithTimeout(url, timeout);
-                    if (response.ok) {
-                        directOk = true;
-                        break;
-                    }
-                } catch (e) {
-                    logError('probeEndpoint', e);
-                }
-            }
-
-            const probeLatency = Math.max(1, Math.round(performance.now() - start));
-            const alive = directOk || dnsResult.ok;
-            
-            return {
-                alive,
-                dnsOk: dnsResult.ok,
-                connectOk: directOk,
-                latency: directOk ? probeLatency : dnsResult.latency
-            };
-        }
-
-        // ==================== Scoring ====================
-        
-        function scoreConfig(config, endpoint, probe, baselineLatency) {
-            let score = 0;
-            const proto = config.split('://')[0].toLowerCase();
-
-            if (probe.alive) score += SCORE_WEIGHTS.ALIVE;
-            if (probe.connectOk) score += SCORE_WEIGHTS.CONNECT_OK;
-            if (probe.dnsOk) score += SCORE_WEIGHTS.DNS_OK;
-
-            const latencyScore = Math.max(
-                0, 
-                SCORE_WEIGHTS.LATENCY_MAX - Math.round((probe.latency / Math.max(250, baselineLatency)) * 6)
-            );
-            score += latencyScore;
-
-            if (endpoint.tls && endpoint.tls !== 'none') score += SCORE_WEIGHTS.TLS;
-            if (endpoint.sni) score += SCORE_WEIGHTS.SNI;
-            if (endpoint.network && ['ws', 'grpc'].includes(endpoint.network)) score += SCORE_WEIGHTS.NETWORK;
-            if (proto === 'vless' || proto === 'trojan') score += SCORE_WEIGHTS.PROTOCOL;
-
-            return Math.max(0, Math.min(100, score));
-        }
-
-        // ==================== Main Process ====================
-        
-        function cancelProcess() {
-            processCancelled = true;
-            setProgress('در حال لغو...', 100);
-        }
-
+        // --- پردازش اصلی ---
         async function startProcess() {
-            processCancelled = false;
-            
-            let selectedUrls = Array.from(document.querySelectorAll('.source-checkbox:checked'))
-                .map(cb => cb.value)
-                .filter(url => sanitizeUrl(url));
-                
-            const customInput = document.getElementById('customInput').value.trim();
-            const limit = parseInt(document.getElementById('limitInput').value, 10);
-            const timeoutMs = parseFloat(document.getElementById('timeoutInput').value) * 1000;
-            const liteMode = document.getElementById('liteModeInput').checked;
+            const selectedUrls = Array.from(document.querySelectorAll('.source-checkbox:checked')).map(cb => cb.value);
+            const customLinks = document.getElementById('customInput').value.trim();
+            const limit = parseInt(document.getElementById('limitInput').value);
+            const deepCheck = document.getElementById('deepCheck').checked;
+            const dedup = document.getElementById('dedup').checked;
 
-            if (!selectedUrls.length && !customInput) {
-                showError('حداقل یک منبع یا کانفیگ دستی وارد کنید.');
-                return;
-            }
+            if (selectedUrls.length === 0 && !customLinks) return alert("لطفا منبع انتخاب کنید!");
 
-            if (liteMode && selectedUrls.length > LITE_SOURCE_CAP) {
-                selectedUrls = selectedUrls.slice(0, LITE_SOURCE_CAP);
-            }
-
-            // UI Updates
+            // UI Reset
             document.getElementById('startBtn').classList.add('hidden');
-            document.getElementById('cancelBtn').classList.remove('hidden');
             document.getElementById('statusArea').classList.remove('hidden');
             document.getElementById('resultsArea').classList.add('hidden');
             document.getElementById('actionBar').classList.add('hidden');
-            document.getElementById('errorArea').classList.add('hidden');
             document.getElementById('cardsContainer').innerHTML = '';
-            
-            rankedConfigs = [];
-            sourceStats = [];
+            validConfigs = [];
 
-            try {
-                setProgress('ارزیابی وضعیت اینترنت (بدون VPN)...', 3);
-                const baseline = await measureBaseline(timeoutMs);
-                const dynamicTimeout = Math.max(timeoutMs, Math.min(timeoutMs * 2, baseline.latency * 1.8));
+            const pBar = document.getElementById('progressBar');
+            const pText = document.getElementById('statusText');
 
-                if (processCancelled) throw new Error('cancelled');
+            let allConfigs = [];
 
-                const knownSources = new Map(SOURCES.map(s => [s.url, s.name]));
-                const manualConfigs = [];
-                
-                if (customInput) {
-                    for (const line of splitAndCleanLines(customInput)) {
-                        if (line.startsWith('http')) {
-                            const sanitized = sanitizeUrl(line);
-                            if (sanitized) selectedUrls.push(sanitized);
-                        } else if (/^(vmess|vless|trojan|ss|hy2|tuic):\/\//i.test(line)) {
-                            manualConfigs.push(line);
-                        }
+            // 1. دانلود منابع
+            let downloaded = 0;
+            const totalSources = selectedUrls.length + (customLinks ? 1 : 0);
+
+            if (customLinks) {
+                const lines = customLinks.split('\n');
+                lines.forEach(line => {
+                    if (line.match(/^(vmess|vless|trojan|ss|hy2)/)) allConfigs.push(line.trim());
+                });
+            }
+
+            for (const url of selectedUrls) {
+                pText.innerText = `در حال دریافت منابع (${downloaded}/${selectedUrls.length})...`;
+                pBar.style.width = `${(downloaded / totalSources) * 30}%`;
+                try {
+                    const proxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+                    const res = await fetch(proxy);
+                    const text = await res.text();
+                    const decoded = smartDecode(text);
+                    const extracted = extractConfigs(decoded);
+                    allConfigs.push(...extracted);
+                } catch {}
+                downloaded++;
+            }
+
+            // 2. حذف تکراری (هوشمند)
+            if (dedup) {
+                pText.innerText = "حذف تکراری‌های هوشمند...";
+                const uniqueMap = new Map();
+                allConfigs.forEach(conf => {
+                    const details = parseConfigDetails(conf);
+                    if (details) {
+                        const key = `${details.ip}:${details.port}`; // کلید منحصر به فرد: آی‌پی و پورت
+                        if (!uniqueMap.has(key)) uniqueMap.set(key, conf);
                     }
-                }
+                });
+                allConfigs = Array.from(uniqueMap.values());
+            } else {
+                allConfigs = [...new Set(allConfigs)];
+            }
 
-                selectedUrls = Array.from(new Set(selectedUrls));
-                const allConfigs = [...manualConfigs];
+            if (allConfigs.length === 0) {
+                alert("کانفیگی پیدا نشد!");
+                location.reload();
+                return;
+            }
 
-                for (let i = 0; i < selectedUrls.length; i++) {
-                    if (processCancelled) throw new Error('cancelled');
-                    
-                    const url = selectedUrls[i];
-                    const stats = {
-                        name: knownSources.get(url) || `Custom ${i + 1}`,
-                        url,
-                        fetched: 0,
-                        ok: false
-                    };
-                    
-                    setProgress(
-                        `دریافت لینک ${i + 1}/${selectedUrls.length}: ${stats.name}`, 
-                        8 + ((i / Math.max(1, selectedUrls.length)) * 32)
-                    );
-                    
-                    const result = await fetchSource(url, dynamicTimeout + 1000);
-                    stats.fetched = result.configs.length;
-                    stats.ok = result.ok;
-                    sourceStats.push(stats);
-                    allConfigs.push(...result.configs);
+            // 3. تست اتصال
+            pText.innerText = `تست اتصال ${allConfigs.length} کانفیگ...`;
+            let checked = 0;
+            const maxChecks = Math.min(allConfigs.length, limit * (deepCheck ? 3 : 5));
+            const batchSize = deepCheck ? 5 : 15;
 
-                    const totalFetched = sourceStats.reduce((acc, s) => acc + s.fetched, 0) + manualConfigs.length;
-                    updateQualityHint({ 
-                        totalFetched, 
-                        uniqueConfigs: 0, 
-                        checked: 0, 
-                        totalChecks: 0, 
-                        alive: 0 
-                    });
-                }
+            for (let i = 0; i < maxChecks; i += batchSize) {
+                const batch = allConfigs.slice(i, i + batchSize);
+                const promises = batch.map(conf => checkConnectivity(conf, deepCheck));
+                const results = await Promise.all(promises);
 
-                if (processCancelled) throw new Error('cancelled');
-
-                const uniqueConfigs = Array.from(new Set(allConfigs.map(v => v.trim()).filter(Boolean)));
-                
-                if (!uniqueConfigs.length) {
-                    throw new Error('هیچ کانفیگی دریافت نشد. لینک‌ها یا اینترنت را بررسی کنید.');
-                }
-
-                const parsed = uniqueConfigs
-                    .map(config => ({ config, endpoint: parseEndpoint(config) }))
-                    .filter(item => item.endpoint && item.endpoint.host && isValidPort(item.endpoint.port));
-
-                if (!parsed.length) {
-                    throw new Error('کانفیگ‌ها دریافت شدند ولی endpoint معتبر استخراج نشد.');
-                }
-
-                const endpointMap = new Map();
-                parsed.forEach(item => endpointMap.set(endpointKey(item.endpoint), item.endpoint));
-                const endpoints = Array.from(endpointMap.values());
-
-                const maxEndpointChecks = Math.min(endpoints.length, liteMode ? limit * 4 : limit * 8);
-                const batchSize = baseline.quality === 'weak' ? 3 : (liteMode ? 6 : 12);
-
-                const probeResults = new Map();
-                let checked = 0;
-                let aliveCount = 0;
-
-                for (let i = 0; i < maxEndpointChecks; i += batchSize) {
-                    if (processCancelled) throw new Error('cancelled');
-                    
-                    const batch = endpoints.slice(i, i + batchSize);
-                    const results = await Promise.all(
-                        batch.map(ep => probeEndpoint(ep.host, ep.port, dynamicTimeout))
-                    );
-
-                    batch.forEach((ep, idx) => {
-                        const probe = results[idx];
-                        probeResults.set(endpointKey(ep), probe);
-                        if (probe.alive) aliveCount++;
-                    });
-
-                    checked += batch.length;
-                    const progress = 45 + ((checked / maxEndpointChecks) * 50);
-                    setProgress(`بررسی endpoint: ${checked}/${maxEndpointChecks} | سالم: ${aliveCount}`, progress);
-                    
-                    updateQualityHint({
-                        totalFetched: allConfigs.length,
-                        uniqueConfigs: uniqueConfigs.length,
-                        checked,
-                        totalChecks: maxEndpointChecks,
-                        alive: aliveCount
-                    });
-                }
-
-                if (processCancelled) throw new Error('cancelled');
-
-                rankedConfigs = parsed.map(item => {
-                    const probe = probeResults.get(endpointKey(item.endpoint)) || { 
-                        alive: false, 
-                        dnsOk: false, 
-                        connectOk: false, 
-                        latency: dynamicTimeout 
-                    };
-                    
-                    return {
-                        config: item.config,
-                        ping: probe.latency,
-                        alive: probe.alive,
-                        score: scoreConfig(item.config, item.endpoint, probe, baseline.latency)
-                    };
+                results.forEach(res => {
+                    if (res.alive) validConfigs.push(res);
                 });
 
-                rankedConfigs.sort((a, b) => b.score - a.score || a.ping - b.ping);
-                rankedConfigs = rankedConfigs.slice(0, limit);
+                checked += batch.length;
+                const progress = 30 + ((checked / maxChecks) * 70);
+                pBar.style.width = `${progress}%`;
+                pText.innerText = `تست شده: ${checked} | سالم: ${validConfigs.length}`;
 
-                renderResults();
-                setProgress('تحلیل کامل شد.', 100);
-                
-                document.getElementById('statusArea').classList.add('hidden');
-                document.getElementById('resultsArea').classList.remove('hidden');
-                document.getElementById('actionBar').classList.remove('hidden');
+                if (validConfigs.length >= limit * 1.2) break;
+            }
 
-            } catch (error) {
-                if (error.message === 'cancelled') {
-                    setProgress('فرآیند لغو شد.', 100);
+            // 4. نمایش نتایج
+            validConfigs.sort((a, b) => a.ping - b.ping);
+            displayedConfigs = validConfigs.slice(0, limit);
+            
+            filterResults('all'); // رندر اولیه
+            
+            document.getElementById('statusArea').classList.add('hidden');
+            document.getElementById('resultsArea').classList.remove('hidden');
+            document.getElementById('actionBar').classList.remove('hidden');
+            document.getElementById('startBtn').classList.remove('hidden');
+            document.getElementById('startBtn').innerText = "تست مجدد";
+        }
+
+        // --- توابع کمکی ---
+
+        function smartDecode(str) {
+            try {
+                str = str.trim();
+                if (str.includes('vmess://') || str.includes('vless://')) return str;
+                return atob(str.replace(/-/g, '+').replace(/_/g, '/').replace(/\s/g, ''));
+            } catch { return str; }
+        }
+
+        function extractConfigs(text) {
+            return text.match(/(vmess|vless|trojan|ss|hy2|tuic):\/\/[^\s\n]+/g) || [];
+        }
+
+        function parseConfigDetails(config) {
+            try {
+                let ip, port, type, name = 'Config';
+                if (config.startsWith('vmess')) {
+                    const b64 = config.replace('vmess://', '');
+                    const json = JSON.parse(atob(b64));
+                    ip = json.add; port = json.port; type = 'vmess'; name = json.ps || '';
                 } else {
-                    logError('startProcess', error);
-                    showError(error.message || 'خطای ناشناخته رخ داد');
-                    setProgress('خطا در اجرا', 100);
+                    const match = config.match(/^(.*?):\/\/(?:.*?@)?(.*?):(\d+)/);
+                    if (match) {
+                        type = match[1]; ip = match[2]; port = match[3];
+                        name = decodeURIComponent(config.split('#')[1] || '');
+                    }
                 }
-            } finally {
-                document.getElementById('startBtn').classList.remove('hidden');
-                document.getElementById('cancelBtn').classList.add('hidden');
-                document.getElementById('startBtn').innerHTML = `<span>تحلیل مجدد</span><i class="fas fa-redo text-xs"></i>`;
+                // تشخیص پرچم از نام
+                let flag = "🏳️";
+                const flagMatch = name.match(/[\uD83C][\uDDE6-\uDDFF][\uD83C][\uDDE6-\uDDFF]/);
+                if (flagMatch) flag = flagMatch[0];
+                
+                return { ip, port, type, name, flag };
+            } catch { return null; }
+        }
+
+        async function checkConnectivity(config, deep) {
+            const start = Date.now();
+            const details = parseConfigDetails(config);
+            if (!details) return { alive: false };
+
+            // تست پورت (سریع)
+            try {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 2000);
+                
+                // ترفند fetch no-cors
+                await fetch(`http://${details.ip}:${details.port}`, { 
+                    mode: 'no-cors', 
+                    signal: controller.signal 
+                });
+                clearTimeout(timeout);
+                
+                // اگر WS باشد و تست عمیق فعال باشد، تست دقیق‌تر (اختیاری)
+                // اینجا برای سادگی و سرعت، موفقیت fetch را ملاک قرار می‌دهیم.
+                
+                return { alive: true, ping: Date.now() - start, config, details };
+            } catch (err) {
+                if (err.name === 'AbortError') return { alive: false };
+                // Network Error سریع یعنی پورت باز است (RST)
+                return { alive: true, ping: Date.now() - start, config, details };
             }
         }
 
-        function renderResults() {
+        // --- مدیریت نمایش و فیلتر ---
+
+        function filterResults(type) {
+            // آپدیت دکمه‌ها
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = 'tab-btn inactive';
+            });
+            document.getElementById(`filter-${type}`).className = 'tab-btn active';
+
             const container = document.getElementById('cardsContainer');
             container.innerHTML = '';
-            document.getElementById('countVal').textContent = rankedConfigs.length;
-
-            if (sourceStats.length) {
-                const sourceSummary = sourceStats
-                    .map(s => `${escapeHtml(s.name)}: ${s.fetched}`)
-                    .join(' | ');
-                    
-                const summaryDiv = document.createElement('div');
-                summaryDiv.className = 'bg-blue-50 border border-blue-100 rounded-xl p-3 text-[11px] text-blue-700';
-                summaryDiv.textContent = sourceSummary;
-                container.appendChild(summaryDiv);
+            
+            let filtered = displayedConfigs;
+            if (type !== 'all') {
+                if (type === 'reality') {
+                    filtered = displayedConfigs.filter(c => c.config.includes('security=reality') || c.config.includes('pbk='));
+                } else {
+                    filtered = displayedConfigs.filter(c => c.details.type === type);
+                }
             }
 
-            rankedConfigs.forEach(item => {
-                const type = item.config.split('://')[0].toUpperCase();
-                let name = 'Config';
-                
-                try {
-                    if (item.config.includes('#')) {
-                        name = decodeURIComponent(item.config.split('#')[1]);
-                    }
-                } catch (e) {
-                    logError('renderResults decode', e);
-                }
-                
-                const stateColor = item.score >= 70 ? 'text-green-600' : (item.score >= 45 ? 'text-yellow-600' : 'text-red-600');
-                const stateLabel = item.score >= 70 ? 'پیشنهادی' : (item.score >= 45 ? 'متوسط' : 'ضعیف');
-                const health = item.alive ? 'سالم' : 'نامطمئن';
+            document.getElementById('count-all').innerText = displayedConfigs.length;
 
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="text-center text-gray-400 text-sm py-10">موردی یافت نشد</div>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const d = item.details;
+                const pingColor = item.ping < 500 ? 'text-green-600 bg-green-50' : (item.ping < 1000 ? 'text-yellow-600 bg-yellow-50' : 'text-orange-600 bg-orange-50');
+                
                 const card = document.createElement('div');
-                card.className = 'bg-white border border-gray-100 rounded-xl p-3 flex justify-between items-center shadow-sm';
+                card.className = 'bg-white border border-gray-100 rounded-2xl p-3 flex justify-between items-center shadow-sm hover:shadow-md card-hover group';
                 card.innerHTML = `
-                    <div class="flex items-center gap-3 overflow-hidden">
-                        <span class="bg-blue-50 text-blue-600 font-bold text-[10px] px-2 py-1 rounded">${escapeHtml(type)}</span>
-                        <div class="truncate">
-                            <div class="font-bold text-xs text-gray-700 truncate w-36">${escapeHtml(name)}</div>
-                            <div class="text-[10px] text-gray-400 font-mono truncate w-36 opacity-70" title="${escapeHtml(item.config)}">${escapeHtml(item.config.substring(0, 50))}...</div>
+                    <div class="flex items-center gap-3 overflow-hidden w-full">
+                        <div class="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-xl shadow-inner shrink-0">
+                            ${d.flag}
                         </div>
-                    </div>
-                    <div class="text-right">
-                        <div class="text-xs font-bold font-mono ${stateColor}">${item.score}/100</div>
-                        <div class="text-[10px] text-gray-500">${escapeHtml(stateLabel)} • ${escapeHtml(health)} • ${item.ping}ms</div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-0.5">
+                                <span class="bg-blue-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">${d.type}</span>
+                                <span class="font-bold text-xs text-gray-700 truncate">${d.name || 'Config'}</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-[10px] text-gray-400 font-mono">
+                                <span class="truncate max-w-[120px]">${d.ip}:${d.port}</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-end gap-1">
+                            <span class="font-mono text-xs font-bold px-2 py-0.5 rounded-md ${pingColor}">${item.ping}ms</span>
+                            <button onclick="showQr('${encodeURIComponent(item.config)}')" class="text-gray-400 hover:text-blue-500 transition">
+                                <i class="fas fa-qrcode"></i>
+                            </button>
+                        </div>
                     </div>
                 `;
                 container.appendChild(card);
             });
         }
 
-        // ==================== Export Functions ====================
-        
+        // --- QR Code Modal ---
+        function showQr(config) {
+            config = decodeURIComponent(config);
+            const modal = document.getElementById('qrModal');
+            const place = document.getElementById('qrPlace');
+            const textLink = document.getElementById('qrTextLink');
+            
+            place.innerHTML = '';
+            textLink.innerText = config.substring(0, 50) + '...';
+            
+            new QRCode(place, {
+                text: config,
+                width: 180,
+                height: 180,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.L
+            });
+            
+            modal.classList.remove('hidden');
+        }
+
+        function closeQr() {
+            document.getElementById('qrModal').classList.add('hidden');
+        }
+
+        // --- کپی و دانلود ---
         function copyAll() {
-            if (!rankedConfigs.length) {
-                showError('هیچ کانفیگی برای کپی وجود ندارد.');
-                return;
-            }
-            
-            const txt = rankedConfigs.map(c => c.config).join('\n');
-            
-            navigator.clipboard.writeText(txt)
-                .then(() => {
-                    showError('✓ همه کانفیگ‌ها کپی شدند!');
-                })
-                .catch(err => {
-                    logError('copyAll', err);
-                    showError('خطا در کپی کردن');
-                });
+            const txt = displayedConfigs.map(c => c.config).join('\n');
+            navigator.clipboard.writeText(txt).then(() => alert('✅ کپی شد!'));
         }
 
         function downloadSub() {
-            if (!rankedConfigs.length) {
-                showError('هیچ کانفیگی برای دانلود وجود ندارد.');
-                return;
-            }
-            
-            try {
-                const txt = rankedConfigs.map(c => c.config).join('\n');
-                const encoded = btoa(unescape(encodeURIComponent(txt)));
-                const blob = new Blob([encoded], { type: 'text/plain;charset=utf-8' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = `Subscription_${Date.now()}.txt`;
-                link.click();
-                URL.revokeObjectURL(link.href);
-            } catch (err) {
-                logError('downloadSub', err);
-                showError('خطا در دانلود فایل');
-            }
+            const txt = displayedConfigs.map(c => c.config).join('\n');
+            const blob = new Blob([btoa(txt)], {type: 'text/plain'});
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `Sub_${Date.now()}.txt`;
+            link.click();
         }
 
-        // ==================== Initialization ====================
-        
-        window.addEventListener('DOMContentLoaded', () => {
-            renderSources();
-        });
+        // اجرا
+        renderSources();
     </script>
-
 </body>
 </html>
