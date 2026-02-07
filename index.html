@@ -158,13 +158,21 @@
         ];
 
         const LITE_SOURCE_CAP = 4;
+ codex/fix-syntax-error-from-merge-conflict-vseb7x
+
+        let rankedConfigs = [];
+
+ main
         const BASELINE_ENDPOINTS = [
             'https://www.gstatic.com/generate_204',
             'https://cp.cloudflare.com/generate_204'
         ];
+ codex/fix-syntax-error-from-merge-conflict-vseb7x
 
         let rankedConfigs = [];
         let sourceStats = [];
+
+ main
 
         function renderSources() {
             const grid = document.getElementById('sourcesGrid');
@@ -390,6 +398,7 @@
 
             return Math.max(0, Math.min(100, score));
         }
+ codex/fix-syntax-error-from-merge-conflict-vseb7x
 
         function updateQualityHint(summary) {
             const parts = [
@@ -401,13 +410,19 @@
             document.getElementById('qualityHint').innerText = parts.join(' | ');
         }
 
+
+ main
         async function startProcess() {
             let selectedUrls = Array.from(document.querySelectorAll('.source-checkbox:checked')).map(cb => cb.value);
             const customInput = document.getElementById('customInput').value.trim();
             const limit = parseInt(document.getElementById('limitInput').value, 10);
             const timeoutMs = parseFloat(document.getElementById('timeoutInput').value) * 1000;
             const liteMode = document.getElementById('liteModeInput').checked;
+ codex/fix-syntax-error-from-merge-conflict-vseb7x
             const startBtn = document.getElementById('startBtn');
+
+            const qualityHint = document.getElementById('qualityHint');
+ main
 
             if (!selectedUrls.length && !customInput) {
                 alert('حداقل یک منبع یا کانفیگ دستی وارد کنید.');
@@ -435,6 +450,7 @@
             if (customInput) {
                 for (const line of splitAndCleanLines(customInput)) {
                     if (line.startsWith('http')) selectedUrls.push(line);
+ codex/fix-syntax-error-from-merge-conflict-vseb7x
                     else if (/^(vmess|vless|trojan|ss|hy2|tuic):\/\//i.test(line)) manualConfigs.push(line);
                 }
             }
@@ -466,17 +482,43 @@
                 setProgress('هیچ کانفیگی دریافت نشد. لینک‌ها یا اینترنت را بررسی کنید.', 100);
                 updateQualityHint({ totalFetched: 0, uniqueConfigs: 0, checked: 0, totalChecks: 0, alive: 0 });
                 startBtn.classList.remove('hidden');
+
+                    else if (/^(vmess|vless|trojan|ss|hy2|tuic):\/\//i.test(line)) allConfigs.push(line);
+                }
+            }
+
+            let fetched = 0;
+            for (const url of selectedUrls) {
+                setProgress(`دریافت منبع ${fetched + 1} از ${selectedUrls.length}...`, 5 + (fetched / Math.max(1, selectedUrls.length)) * 20);
+                const items = await fetchSource(url, dynamicTimeout);
+                allConfigs.push(...items);
+                fetched++;
+            }
+
+            const uniqueConfigs = Array.from(new Set(allConfigs));
+            if (!uniqueConfigs.length) {
+                setProgress('هیچ کانفیگ معتبری یافت نشد.', 100);
+                document.getElementById('startBtn').classList.remove('hidden');
+main
                 return;
             }
 
             const parsed = uniqueConfigs
                 .map(config => ({ config, endpoint: parseEndpoint(config) }))
+ codex/fix-syntax-error-from-merge-conflict-vseb7x
                 .filter(item => item.endpoint && item.endpoint.host && Number.isFinite(item.endpoint.port));
 
             if (!parsed.length) {
                 setProgress('کانفیگ‌ها دریافت شدند ولی endpoint معتبر استخراج نشد.', 100);
                 updateQualityHint({ totalFetched: allConfigs.length, uniqueConfigs: uniqueConfigs.length, checked: 0, totalChecks: 0, alive: 0 });
                 startBtn.classList.remove('hidden');
+
+                .filter(item => item.endpoint && item.endpoint.host && item.endpoint.port);
+
+            if (!parsed.length) {
+                setProgress('endpoint معتبری برای تست پیدا نشد.', 100);
+                document.getElementById('startBtn').classList.remove('hidden');
+ main
                 return;
             }
 
@@ -484,8 +526,13 @@
             parsed.forEach(item => endpointMap.set(endpointKey(item.endpoint), item.endpoint));
             const endpoints = Array.from(endpointMap.values());
 
+ codex/fix-syntax-error-from-merge-conflict-vseb7x
             const maxEndpointChecks = Math.min(endpoints.length, liteMode ? limit * 4 : limit * 8);
             const batchSize = baseline.quality === 'weak' ? 3 : (liteMode ? 6 : 12);
+
+            const maxEndpointChecks = Math.min(endpoints.length, liteMode ? limit * 3 : limit * 6);
+            const batchSize = baseline.quality === 'weak' ? 3 : (liteMode ? 5 : 12);
+ main
 
             const probeResults = new Map();
             let checked = 0;
@@ -495,6 +542,7 @@
                 const batch = endpoints.slice(i, i + batchSize);
                 const results = await Promise.all(batch.map(ep => probeEndpoint(ep.host, ep.port, dynamicTimeout)));
 
+ codex/fix-syntax-error-from-merge-conflict-vseb7x
                 batch.forEach((ep, idx) => {
                     const probe = results[idx];
                     probeResults.set(endpointKey(ep), probe);
@@ -511,6 +559,12 @@
                     totalChecks: maxEndpointChecks,
                     alive: aliveCount
                 });
+
+                checked += batch.length;
+                const progress = 40 + (checked / maxEndpointChecks) * 55;
+                const aliveCount = Array.from(probeResults.values()).filter(v => v.alive).length;
+                setProgress(`تحلیل endpoint: ${checked}/${maxEndpointChecks} | قابل دسترس: ${aliveCount}`, progress);
+ main
             }
 
             rankedConfigs = parsed.map(item => {
@@ -531,8 +585,13 @@
             document.getElementById('statusArea').classList.add('hidden');
             document.getElementById('resultsArea').classList.remove('hidden');
             document.getElementById('actionBar').classList.remove('hidden');
+ codex/fix-syntax-error-from-merge-conflict-vseb7x
             startBtn.classList.remove('hidden');
             startBtn.innerHTML = `<i class="fas fa-redo"></i> تحلیل مجدد`;
+
+            document.getElementById('startBtn').classList.remove('hidden');
+            document.getElementById('startBtn').innerHTML = `<i class="fas fa-redo"></i> تحلیل مجدد`;
+ main
         }
 
         function renderResults() {
@@ -588,7 +647,11 @@
             link.click();
         }
 
+ codex/fix-syntax-error-from-merge-conflict-vseb7x
         assertNoConflictMarkers();
+
+
+ main
         renderSources();
     </script>
 
