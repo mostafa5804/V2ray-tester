@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>تستر هوشمند کانفیگ</title>
-    
+
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <script>
         tailwind.config = {
             theme: {
@@ -16,7 +16,7 @@
                     fontFamily: { sans: ['Vazirmatn', 'sans-serif'] },
                     colors: {
                         primary: '#3b82f6', // آبی
-                        secondary: '#eff6ff', 
+                        secondary: '#eff6ff',
                     }
                 }
             }
@@ -71,7 +71,7 @@
                     <button onclick="toggleSources(false)" class="text-xs bg-gray-50 text-gray-600 px-2 py-1 rounded hover:bg-gray-100">هیچکدام</button>
                 </div>
             </div>
-            
+
             <div id="sourcesGrid" class="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto custom-scroll p-1">
             </div>
         </section>
@@ -92,7 +92,7 @@
                     <span id="limitDisplay" class="font-bold text-blue-600">20</span>
                 </div>
                 <input type="range" id="limitInput" min="5" max="200" value="20" class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500" oninput="document.getElementById('limitDisplay').innerText = this.value">
-                
+
                 <div class="flex justify-between text-xs mt-3 mb-2">
                     <span class="text-gray-600">تایم‌اوت (ثانیه):</span>
                     <span id="timeoutDisplay" class="font-bold text-blue-600">2.0</span>
@@ -120,9 +120,13 @@
                     <h3 class="font-bold text-gray-700 text-sm">نتایج (<span id="countVal">0</span>)</h3>
                     <p id="qualityHint" class="text-[10px] text-gray-500 mt-1">دقت تست: متوسط (مرورگر فقط دسترسی پایه را می‌سنجد)</p>
                 </div>
+ codex/optimize-code-performance-zo5a3r
+                <span class="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full">امتیازدهی</span>
+
                 <span class="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full">سالم</span>
+ main
             </div>
-            
+
             <div id="cardsContainer" class="space-y-2"></div>
         </div>
 
@@ -138,6 +142,7 @@
             </button>
         </div>
     </div>
+
 
     <script>
         const sources = [
@@ -155,12 +160,17 @@
             { name: "Epodonios - All", url: "https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/All_Configs_Sub.txt" }
         ];
 
+ codex/optimize-code-performance-zo5a3r
+        const LITE_SOURCE_CAP = 4;
+        let rankedConfigs = [];
+
         let validConfigs = [];
         const LITE_SOURCE_CAP = 4;
         const BASELINE_ENDPOINTS = [
             "https://www.gstatic.com/generate_204",
             "https://cp.cloudflare.com/generate_204"
         ];
+ main
 
         function renderSources() {
             const grid = document.getElementById('sourcesGrid');
@@ -186,16 +196,167 @@
             document.querySelectorAll('.source-checkbox').forEach(cb => cb.checked = state);
         }
 
+        function setProgress(text, percent) {
+            document.getElementById('statusText').innerText = text;
+            document.getElementById('progressBar').style.width = `${Math.max(0, Math.min(100, percent))}%`;
+        }
+
+        function splitAndCleanLines(input) {
+            return input.split('\n').map(v => v.trim()).filter(Boolean);
+        }
+
+        function decodeBase64Safe(value) {
+            try {
+                const normalized = value.replace(/-/g, '+').replace(/_/g, '/').replace(/\s/g, '');
+                const raw = atob(normalized);
+                const bytes = Uint8Array.from(raw, c => c.charCodeAt(0));
+                return new TextDecoder().decode(bytes);
+            } catch {
+                return value;
+            }
+        }
+
+        function maybeDecodeSubscription(text) {
+            const trimmed = text.trim();
+            if (!trimmed) return '';
+            if (/(vmess|vless|trojan|ss|hy2|tuic):\/\//i.test(trimmed)) return trimmed;
+            return decodeBase64Safe(trimmed);
+        }
+
+        function extractConfigs(text) {
+            return text.match(/(vmess|vless|trojan|ss|hy2|tuic):\/\/[^\s\n]+/gi) || [];
+        }
+
+        function parseEndpoint(config) {
+            try {
+                if (config.startsWith('vmess://')) {
+                    const json = JSON.parse(decodeBase64Safe(config.slice(8)));
+                    return {
+                        host: String(json.add || '').trim(),
+                        port: parseInt(json.port || 80),
+                        network: json.net || '',
+                        tls: json.tls || '',
+                        sni: json.sni || json.host || '',
+                    };
+                }
+
+                const m = config.match(/@([^:#?]+):(\d+)/) || config.match(/\/\/([^:#?]+):(\d+)/);
+                if (!m) return null;
+                const url = new URL(config.replace(/^(vmess|vless|trojan|ss|hy2|tuic):\/\//, 'https://'));
+                return {
+                    host: m[1],
+                    port: parseInt(m[2]),
+                    network: url.searchParams.get('type') || '',
+                    tls: url.searchParams.get('security') || url.searchParams.get('tls') || '',
+                    sni: url.searchParams.get('sni') || url.searchParams.get('host') || ''
+                };
+            } catch {
+                return null;
+            }
+        }
+
+        async function fetchWithTimeout(url, timeout, options = {}) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeout);
+            try {
+                return await fetch(url, { ...options, signal: controller.signal });
+            } finally {
+                clearTimeout(id);
+            }
+        }
+
+        async function fetchSource(url, timeout) {
+            const candidates = [
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+                `https://r.jina.ai/http://${url.replace(/^https?:\/\//, '')}`,
+            ];
+
+            for (const target of candidates) {
+                try {
+                    const res = await fetchWithTimeout(target, timeout);
+                    if (!res.ok) continue;
+                    const body = await res.text();
+                    if (body.trim()) return body;
+                } catch {}
+            }
+            return '';
+        }
+
+        async function measureBaseline(timeout) {
+            const probes = [
+                'https://www.gstatic.com/generate_204',
+                'https://cp.cloudflare.com/generate_204'
+            ];
+            const timings = [];
+            for (const url of probes) {
+                const start = Date.now();
+                try {
+                    await fetchWithTimeout(url, timeout, { mode: 'no-cors' });
+                    timings.push(Date.now() - start);
+                } catch {}
+            }
+            if (!timings.length) return { latency: timeout, quality: 'weak' };
+            const avg = timings.reduce((a, b) => a + b, 0) / timings.length;
+            return { latency: avg, quality: avg > 1300 ? 'weak' : 'normal' };
+        }
+
+        function endpointKey(ep) {
+            return `${ep.host}:${ep.port}`;
+        }
+
+        function probeUrls(host, port) {
+            const tlsPorts = new Set([443, 8443, 2053, 2083]);
+            const httpsFirst = tlsPorts.has(Number(port));
+            const a = `https://${host}:${port}`;
+            const b = `http://${host}:${port}`;
+            return httpsFirst ? [a, b] : [b, a];
+        }
+
+        async function probeEndpoint(host, port, timeout) {
+            const started = Date.now();
+            for (const url of probeUrls(host, port)) {
+                try {
+                    await fetchWithTimeout(url, timeout, { mode: 'no-cors' });
+                    return { alive: true, latency: Date.now() - started };
+                } catch {}
+            }
+            return { alive: false, latency: timeout };
+        }
+
+        function scoreConfig(config, endpoint, probe, baselineLatency) {
+            let score = 0;
+            const proto = config.split('://')[0].toLowerCase();
+
+            if (probe.alive) score += 60;
+            const latencyScore = Math.max(0, 30 - Math.round((probe.latency / Math.max(250, baselineLatency)) * 10));
+            score += latencyScore;
+
+            if (endpoint.tls && endpoint.tls !== 'none') score += 5;
+            if (endpoint.sni) score += 3;
+            if (endpoint.network && ['ws', 'grpc'].includes(endpoint.network)) score += 2;
+            if (proto === 'vless' || proto === 'trojan') score += 2;
+
+            return Math.max(0, Math.min(100, score));
+        }
+
         async function startProcess() {
             let selectedUrls = Array.from(document.querySelectorAll('.source-checkbox:checked')).map(cb => cb.value);
+ codex/optimize-code-performance-zo5a3r
+            const customInput = document.getElementById('customInput').value.trim();
+            const limit = parseInt(document.getElementById('limitInput').value);
+            const timeoutMs = parseFloat(document.getElementById('timeoutInput').value) * 1000;
+            const liteMode = document.getElementById('liteModeInput').checked;
+            const qualityHint = document.getElementById('qualityHint');
+
             const customLinks = document.getElementById('customInput').value.trim();
             const limit = parseInt(document.getElementById('limitInput').value);
             const timeout = parseFloat(document.getElementById('timeoutInput').value) * 1000;
             const liteMode = document.getElementById('liteModeInput').checked;
             const pHint = document.getElementById('qualityHint');
+ main
 
-            if (selectedUrls.length === 0 && !customLinks) {
-                alert("لطفاً حداقل یک منبع انتخاب کنید!");
+            if (!selectedUrls.length && !customInput) {
+                alert('حداقل یک منبع یا کانفیگ دستی وارد کنید.');
                 return;
             }
 
@@ -208,6 +369,21 @@
             document.getElementById('resultsArea').classList.add('hidden');
             document.getElementById('actionBar').classList.add('hidden');
             document.getElementById('cardsContainer').innerHTML = '';
+ codex/optimize-code-performance-zo5a3r
+            rankedConfigs = [];
+
+            setProgress('بررسی کیفیت اینترنت شما...', 3);
+            const baseline = await measureBaseline(timeoutMs);
+            const dynamicTimeout = Math.max(timeoutMs, Math.min(timeoutMs * 2, baseline.latency * 1.8));
+            qualityHint.innerText = `دقت تخمین: ${baseline.quality === 'weak' ? 'پایین' : 'متوسط'} | تاخیر پایه: ${Math.round(baseline.latency)}ms`;
+
+            const allConfigs = [];
+            if (customInput) {
+                for (const line of splitAndCleanLines(customInput)) {
+                    if (line.startsWith('http')) selectedUrls.push(line);
+                    else if (/^(vmess|vless|trojan|ss|hy2|tuic):\/\//i.test(line)) allConfigs.push(line);
+                }
+
             validConfigs = [];
 
             const pBar = document.getElementById('progressBar');
@@ -224,7 +400,25 @@
                     if (clean.startsWith('http')) selectedUrls.push(clean);
                     else if (clean.match(/^(vmess|vless|trojan|ss|hy2)/)) allConfigs.push(clean);
                 });
+ main
             }
+            selectedUrls = [...new Set(selectedUrls)];
+
+ codex/optimize-code-performance-zo5a3r
+            let done = 0;
+            for (const url of selectedUrls) {
+                setProgress(`دانلود منابع (${done + 1}/${selectedUrls.length})...`, 5 + ((done + 1) / Math.max(1, selectedUrls.length)) * 35);
+                const raw = await fetchSource(url, dynamicTimeout + 1500);
+                if (raw) {
+                    const decoded = maybeDecodeSubscription(raw);
+                    allConfigs.push(...extractConfigs(decoded));
+                }
+                done++;
+            }
+
+            const uniqueConfigs = [...new Set(allConfigs.map(c => c.trim()).filter(Boolean))];
+            if (!uniqueConfigs.length) {
+                alert('هیچ کانفیگی استخراج نشد. احتمالاً منابع در دسترس نیستند یا فرمت ناسازگار است.');
 
             selectedUrls = [...new Set(selectedUrls)];
 
@@ -255,6 +449,18 @@
             
             if (allConfigs.length === 0) {
                 alert("هیچ کانفیگی یافت نشد! (شاید منابع در دسترس نیستند)");
+               main
+                document.getElementById('statusArea').classList.add('hidden');
+                document.getElementById('startBtn').classList.remove('hidden');
+                return;
+            }
+
+ codex/optimize-code-performance-zo5a3r
+            const parsed = uniqueConfigs.map(config => ({ config, endpoint: parseEndpoint(config) }))
+                .filter(item => item.endpoint && item.endpoint.host && Number.isFinite(item.endpoint.port));
+
+            if (!parsed.length) {
+                alert('کانفیگ معتبر برای تحلیل پیدا نشد.');
                 document.getElementById('statusArea').classList.add('hidden');
                 document.getElementById('startBtn').classList.remove('hidden');
                 return;
@@ -272,10 +478,29 @@
                 const batch = allConfigs.slice(i, i + batchSize);
                 const promises = batch.map(conf => checkConnectivity(conf, dynamicTimeout));
                 const results = await Promise.all(promises);
+             main
 
-                results.forEach(res => {
-                    if (res.alive) validConfigs.push(res);
-                });
+            const endpointMap = new Map();
+            for (const item of parsed) {
+                endpointMap.set(endpointKey(item.endpoint), item.endpoint);
+            }
+            const endpoints = Array.from(endpointMap.values());
+
+ codex/optimize-code-performance-zo5a3r
+            const maxEndpointChecks = Math.min(endpoints.length, liteMode ? limit * 3 : limit * 6);
+            const batchSize = baseline.quality === 'weak' ? 3 : (liteMode ? 5 : 12);
+
+            const probeResults = new Map();
+            let checked = 0;
+            for (let i = 0; i < maxEndpointChecks; i += batchSize) {
+                const batch = endpoints.slice(i, i + batchSize);
+                const results = await Promise.all(batch.map(ep => probeEndpoint(ep.host, ep.port, dynamicTimeout)));
+                batch.forEach((ep, idx) => probeResults.set(endpointKey(ep), results[idx]));
+
+                checked += batch.length;
+                const progress = 40 + (checked / maxEndpointChecks) * 55;
+                const aliveCount = Array.from(probeResults.values()).filter(v => v.alive).length;
+                setProgress(`تحلیل endpoint: ${checked}/${maxEndpointChecks} | قابل دسترس: ${aliveCount}`, progress);
 
                 checked += batch.length;
                 const progress = 30 + ((checked / maxChecks) * 70);
@@ -283,16 +508,32 @@
                 pText.innerText = `تست: ${checked} | سالم: ${validConfigs.length} | وضعیت: ${networkProfile.quality === "weak" ? "اینترنت ضعیف" : "نرمال"}`;
 
                 if (validConfigs.length >= (liteMode ? limit : limit * 1.5)) break;
+ main
             }
 
-            validConfigs.sort((a, b) => a.ping - b.ping);
-            validConfigs = validConfigs.slice(0, limit);
-            
+            rankedConfigs = parsed.map(item => {
+                const probe = probeResults.get(endpointKey(item.endpoint)) || { alive: false, latency: dynamicTimeout };
+                const score = scoreConfig(item.config, item.endpoint, probe, baseline.latency);
+                return {
+                    config: item.config,
+                    ping: probe.latency,
+                    alive: probe.alive,
+                    score,
+                };
+            });
+
+            rankedConfigs.sort((a, b) => b.score - a.score || a.ping - b.ping);
+            rankedConfigs = rankedConfigs.slice(0, limit);
+
             renderResults();
+            setProgress('تحلیل کامل شد.', 100);
             document.getElementById('statusArea').classList.add('hidden');
             document.getElementById('resultsArea').classList.remove('hidden');
             document.getElementById('actionBar').classList.remove('hidden');
             document.getElementById('startBtn').classList.remove('hidden');
+ codex/optimize-code-performance-zo5a3r
+            document.getElementById('startBtn').innerHTML = `<i class="fas fa-redo"></i> تحلیل مجدد`;
+
             document.getElementById('startBtn').innerHTML = `<i class="fas fa-redo"></i> تست مجدد`;
         }
 
@@ -373,41 +614,46 @@
             }
 
             return { alive: false };
+ main
         }
 
         function renderResults() {
             const container = document.getElementById('cardsContainer');
-            document.getElementById('countVal').innerText = validConfigs.length;
-            
-            validConfigs.forEach(item => {
-                let type = item.config.split('://')[0].toUpperCase();
-                let pingColor = item.ping < 500 ? 'text-green-600' : 'text-yellow-600';
-                let name = 'Config';
-                if(item.config.includes('#')) name = decodeURIComponent(item.config.split('#')[1]);
+            container.innerHTML = '';
+            document.getElementById('countVal').innerText = rankedConfigs.length;
+
+            rankedConfigs.forEach(item => {
+                const type = item.config.split('://')[0].toUpperCase();
+                const name = item.config.includes('#') ? decodeURIComponent(item.config.split('#')[1]) : 'Config';
+                const stateColor = item.score >= 70 ? 'text-green-600' : (item.score >= 45 ? 'text-yellow-600' : 'text-red-600');
+                const stateLabel = item.score >= 70 ? 'پیشنهادی' : (item.score >= 45 ? 'متوسط' : 'ضعیف');
 
                 container.innerHTML += `
                     <div class="bg-white border border-gray-100 rounded-xl p-3 flex justify-between items-center shadow-sm">
                         <div class="flex items-center gap-3 overflow-hidden">
                             <span class="bg-blue-50 text-blue-600 font-bold text-[10px] px-2 py-1 rounded">${type}</span>
                             <div class="truncate">
-                                <div class="font-bold text-xs text-gray-700 truncate w-32">${name}</div>
-                                <div class="text-[10px] text-gray-400 font-mono truncate w-32 opacity-70">${item.config}</div>
+                                <div class="font-bold text-xs text-gray-700 truncate w-36">${name}</div>
+                                <div class="text-[10px] text-gray-400 font-mono truncate w-36 opacity-70">${item.config}</div>
                             </div>
                         </div>
-                        <div class="text-xs font-bold font-mono ${pingColor}">${item.ping}ms</div>
+                        <div class="text-right">
+                            <div class="text-xs font-bold font-mono ${stateColor}">${item.score}/100</div>
+                            <div class="text-[10px] text-gray-500">${stateLabel} • ${item.ping}ms</div>
+                        </div>
                     </div>
                 `;
             });
         }
 
         function copyAll() {
-            const txt = validConfigs.map(c => c.config).join('\n');
+            const txt = rankedConfigs.map(c => c.config).join('\n');
             navigator.clipboard.writeText(txt).then(() => alert('کپی شد!'));
         }
 
         function downloadSub() {
-            const txt = validConfigs.map(c => c.config).join('\n');
-            const blob = new Blob([btoa(txt)], {type: 'text/plain'});
+            const txt = rankedConfigs.map(c => c.config).join('\n');
+            const blob = new Blob([btoa(txt)], { type: 'text/plain' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             link.download = 'Subscription.txt';
@@ -416,5 +662,6 @@
 
         renderSources();
     </script>
+
 </body>
 </html>
