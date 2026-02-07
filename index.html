@@ -83,6 +83,10 @@
             </div>
 
             <div class="bg-blue-50/50 rounded-xl p-3 border border-blue-100">
+                <label class="flex items-center justify-between text-xs mb-3 bg-white/70 border border-blue-100 rounded-lg px-2 py-2">
+                    <span class="text-gray-700 font-bold">حالت کم‌مصرف</span>
+                    <input id="liteModeInput" type="checkbox" class="accent-blue-600 w-4 h-4" checked>
+                </label>
                 <div class="flex justify-between text-xs mb-2">
                     <span class="text-gray-600">تعداد خروجی:</span>
                     <span id="limitDisplay" class="font-bold text-blue-600">20</span>
@@ -150,6 +154,7 @@
         ];
 
         let validConfigs = [];
+        const LITE_SOURCE_CAP = 4;
 
         function renderSources() {
             const grid = document.getElementById('sourcesGrid');
@@ -157,7 +162,7 @@
             sources.forEach((src, idx) => {
                 grid.innerHTML += `
                     <label class="cursor-pointer relative group">
-                        <input type="checkbox" value="${src.url}" class="source-checkbox hidden" checked>
+                        <input type="checkbox" value="${src.url}" class="source-checkbox hidden" ${idx < LITE_SOURCE_CAP ? 'checked' : ''}>
                         <div class="source-card bg-gray-50 rounded-xl p-3 flex items-center gap-3 select-none">
                             <span class="w-2 h-2 rounded-full bg-gray-300 status-dot group-hover:bg-blue-300 transition"></span>
                             <div class="flex-1 min-w-0">
@@ -176,14 +181,19 @@
         }
 
         async function startProcess() {
-            const selectedUrls = Array.from(document.querySelectorAll('.source-checkbox:checked')).map(cb => cb.value);
+            let selectedUrls = Array.from(document.querySelectorAll('.source-checkbox:checked')).map(cb => cb.value);
             const customLinks = document.getElementById('customInput').value.trim();
             const limit = parseInt(document.getElementById('limitInput').value);
             const timeout = parseFloat(document.getElementById('timeoutInput').value) * 1000;
+            const liteMode = document.getElementById('liteModeInput').checked;
 
             if (selectedUrls.length === 0 && !customLinks) {
                 alert("لطفاً حداقل یک منبع انتخاب کنید!");
                 return;
+            }
+
+            if (liteMode && selectedUrls.length > LITE_SOURCE_CAP) {
+                selectedUrls = selectedUrls.slice(0, LITE_SOURCE_CAP);
             }
 
             document.getElementById('startBtn').classList.add('hidden');
@@ -201,10 +211,14 @@
             if (customLinks) {
                 const lines = customLinks.split('\n');
                 lines.forEach(line => {
-                    if (line.startsWith('http')) selectedUrls.push(line.trim());
-                    else if (line.match(/^(vmess|vless|trojan|ss|hy2)/)) allConfigs.push(line.trim());
+                    const clean = line.trim();
+                    if (!clean) return;
+                    if (clean.startsWith('http')) selectedUrls.push(clean);
+                    else if (clean.match(/^(vmess|vless|trojan|ss|hy2)/)) allConfigs.push(clean);
                 });
             }
+
+            selectedUrls = [...new Set(selectedUrls)];
 
             let downloaded = 0;
             for (const url of selectedUrls) {
@@ -213,7 +227,7 @@
                 
                 try {
                     const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-                    const res = await fetch(proxyUrl);
+                    const res = await fetchWithTimeout(proxyUrl, timeout + 1500);
                     const text = await res.text();
                     
                     const decoded = smartDecode(text);
@@ -227,15 +241,17 @@
             
             if (allConfigs.length === 0) {
                 alert("هیچ کانفیگی یافت نشد! (شاید منابع در دسترس نیستند)");
-                window.location.reload();
+                document.getElementById('statusArea').classList.add('hidden');
+                document.getElementById('startBtn').classList.remove('hidden');
                 return;
             }
 
             pText.innerText = `تست اتصال ${allConfigs.length} کانفیگ...`;
             
-            const maxChecks = Math.min(allConfigs.length, limit * 6);
+            const checkMultiplier = liteMode ? 3 : 6;
+            const maxChecks = Math.min(allConfigs.length, limit * checkMultiplier);
             let checked = 0;
-            const batchSize = 10;
+            const batchSize = liteMode ? 4 : 10;
 
             for (let i = 0; i < maxChecks; i += batchSize) {
                 const batch = allConfigs.slice(i, i + batchSize);
@@ -251,7 +267,7 @@
                 pBar.style.width = `${progress}%`;
                 pText.innerText = `تست: ${checked} | سالم: ${validConfigs.length}`;
 
-                if (validConfigs.length >= limit * 1.5) break;
+                if (validConfigs.length >= (liteMode ? limit : limit * 1.5)) break;
             }
 
             validConfigs.sort((a, b) => a.ping - b.ping);
@@ -275,6 +291,16 @@
 
         function extractConfigs(text) {
             return text.match(/(vmess|vless|trojan|ss|hy2|tuic):\/\/[^\s\n]+/g) || [];
+        }
+
+        async function fetchWithTimeout(url, timeout) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeout);
+            try {
+                return await fetch(url, { signal: controller.signal });
+            } finally {
+                clearTimeout(id);
+            }
         }
 
         async function checkConnectivity(config, timeout) {
@@ -306,8 +332,7 @@
                 clearTimeout(id);
                 return { alive: true, ping: Date.now() - start, config };
             } catch (err) {
-                if (err.name === 'AbortError') return { alive: false };
-                return { alive: true, ping: Date.now() - start, config };
+                return { alive: false };
             }
         }
 
