@@ -116,7 +116,10 @@
 
         <div id="resultsArea" class="hidden space-y-3">
             <div class="flex justify-between items-center px-1">
-                <h3 class="font-bold text-gray-700 text-sm">نتایج (<span id="countVal">0</span>)</h3>
+                <div>
+                    <h3 class="font-bold text-gray-700 text-sm">نتایج (<span id="countVal">0</span>)</h3>
+                    <p id="qualityHint" class="text-[10px] text-gray-500 mt-1">دقت تست: متوسط (مرورگر فقط دسترسی پایه را می‌سنجد)</p>
+                </div>
                 <span class="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full">سالم</span>
             </div>
             
@@ -155,6 +158,13 @@
 
         let validConfigs = [];
         const LITE_SOURCE_CAP = 4;
+ codex/optimize-code-performance-m1pbxh
+        const BASELINE_ENDPOINTS = [
+            "https://www.gstatic.com/generate_204",
+            "https://cp.cloudflare.com/generate_204"
+        ];
+=======
+>>>>>>> main
 
         function renderSources() {
             const grid = document.getElementById('sourcesGrid');
@@ -186,6 +196,10 @@
             const limit = parseInt(document.getElementById('limitInput').value);
             const timeout = parseFloat(document.getElementById('timeoutInput').value) * 1000;
             const liteMode = document.getElementById('liteModeInput').checked;
+ codex/optimize-code-performance-m1pbxh
+            const pHint = document.getElementById('qualityHint');
+=======
+>>>>>>> main
 
             if (selectedUrls.length === 0 && !customLinks) {
                 alert("لطفاً حداقل یک منبع انتخاب کنید!");
@@ -207,6 +221,7 @@
             const pText = document.getElementById('statusText');
 
             let allConfigs = [];
+            let networkProfile = { latency: timeout, quality: "normal" };
 
             if (customLinks) {
                 const lines = customLinks.split('\n');
@@ -220,6 +235,14 @@
 
             selectedUrls = [...new Set(selectedUrls)];
 
+ codex/optimize-code-performance-m1pbxh
+            pText.innerText = "پروفایل شبکه شما در حال بررسی...";
+            networkProfile = await profileNetwork(timeout);
+            const dynamicTimeout = Math.max(timeout, Math.min(timeout * 2, networkProfile.latency * 1.5));
+            pHint.innerText = `دقت تست: ${networkProfile.quality === "weak" ? "تقریبی" : "خوب"} | تاخیر پایه: ${Math.round(networkProfile.latency)}ms`;
+
+=======
+>>>>>>> main
             let downloaded = 0;
             for (const url of selectedUrls) {
                 pText.innerText = `دانلود منابع (${downloaded + 1}/${selectedUrls.length})...`;
@@ -227,7 +250,12 @@
                 
                 try {
                     const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+ codex/optimize-code-performance-m1pbxh
+                    const res = await fetchWithTimeout(proxyUrl, dynamicTimeout + 1500);
+                    if (!res.ok) throw new Error('source failed');
+=======
                     const res = await fetchWithTimeout(proxyUrl, timeout + 1500);
+>>>>>>> main
                     const text = await res.text();
                     
                     const decoded = smartDecode(text);
@@ -249,13 +277,20 @@
             pText.innerText = `تست اتصال ${allConfigs.length} کانفیگ...`;
             
             const checkMultiplier = liteMode ? 3 : 6;
+ codex/optimize-code-performance-m1pbxh
+            const adaptiveMultiplier = networkProfile.quality === "weak" ? Math.max(2, checkMultiplier - 1) : checkMultiplier;
+            const maxChecks = Math.min(allConfigs.length, limit * adaptiveMultiplier);
+            let checked = 0;
+            const batchSize = networkProfile.quality === "weak" ? 3 : (liteMode ? 4 : 10);
+=======
             const maxChecks = Math.min(allConfigs.length, limit * checkMultiplier);
             let checked = 0;
             const batchSize = liteMode ? 4 : 10;
+>>>>>>> main
 
             for (let i = 0; i < maxChecks; i += batchSize) {
                 const batch = allConfigs.slice(i, i + batchSize);
-                const promises = batch.map(conf => checkConnectivity(conf, timeout));
+                const promises = batch.map(conf => checkConnectivity(conf, dynamicTimeout));
                 const results = await Promise.all(promises);
 
                 results.forEach(res => {
@@ -265,7 +300,7 @@
                 checked += batch.length;
                 const progress = 30 + ((checked / maxChecks) * 70);
                 pBar.style.width = `${progress}%`;
-                pText.innerText = `تست: ${checked} | سالم: ${validConfigs.length}`;
+                pText.innerText = `تست: ${checked} | سالم: ${validConfigs.length} | وضعیت: ${networkProfile.quality === "weak" ? "اینترنت ضعیف" : "نرمال"}`;
 
                 if (validConfigs.length >= (liteMode ? limit : limit * 1.5)) break;
             }
@@ -293,6 +328,20 @@
             return text.match(/(vmess|vless|trojan|ss|hy2|tuic):\/\/[^\s\n]+/g) || [];
         }
 
+ codex/optimize-code-performance-m1pbxh
+        async function profileNetwork(timeout) {
+            const tests = BASELINE_ENDPOINTS.map(url => timedProbe(url, timeout));
+            const results = await Promise.all(tests);
+            const alive = results.filter(Boolean);
+            if (!alive.length) return { latency: timeout * 1.2, quality: "weak" };
+
+            const avg = alive.reduce((acc, val) => acc + val, 0) / alive.length;
+            const quality = avg > 1200 ? "weak" : "normal";
+            return { latency: avg, quality };
+        }
+
+        async function timedProbe(url, timeout) {
+=======
         async function fetchWithTimeout(url, timeout) {
             const controller = new AbortController();
             const id = setTimeout(() => controller.abort(), timeout);
@@ -304,22 +353,59 @@
         }
 
         async function checkConnectivity(config, timeout) {
+>>>>>>> main
             const start = Date.now();
-            let host = '', port = 80;
-
             try {
-                if (config.startsWith('vmess')) {
-                    const b64 = config.replace('vmess://', '');
-                    const json = JSON.parse(smartDecode(b64));
-                    host = json.add; port = json.port;
-                } else {
-                    const match = config.match(/@([^:]+):(\d+)/) || config.match(/\/\/([^:]+):(\d+)/);
-                    if (match) { host = match[1]; port = match[2]; }
+                await fetchWithTimeout(url, timeout, { mode: 'no-cors' });
+                return Date.now() - start;
+            } catch {
+                return null;
+            }
+        }
+
+        async function fetchWithTimeout(url, timeout, options = {}) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeout);
+            try {
+                return await fetch(url, { ...options, signal: controller.signal });
+            } finally {
+                clearTimeout(id);
+            }
+        }
+
+        function parseConfigEndpoint(config) {
+            try {
+                if (config.startsWith('vmess://')) {
+                    const json = JSON.parse(smartDecode(config.replace('vmess://', '')));
+                    return { host: json.add, port: parseInt(json.port || 80) };
                 }
-            } catch { return { alive: false }; }
 
-            if (!host) return { alive: false };
+                const match = config.match(/@([^:#?]+):(\d+)/) || config.match(/\/\/([^:#?]+):(\d+)/);
+                if (!match) return null;
+                return { host: match[1], port: parseInt(match[2]) };
+            } catch {
+                return null;
+            }
+        }
 
+ codex/optimize-code-performance-m1pbxh
+        async function checkConnectivity(config, timeout) {
+            const start = Date.now();
+            const endpoint = parseConfigEndpoint(config);
+            if (!endpoint || !endpoint.host) return { alive: false };
+
+            const { host, port } = endpoint;
+            const preferHttps = [443, 8443, 2053, 2083].includes(port);
+            const probes = preferHttps
+                ? [`https://${host}:${port}`, `http://${host}:${port}`]
+                : [`http://${host}:${port}`, `https://${host}:${port}`];
+
+            for (const url of probes) {
+                try {
+                    await fetchWithTimeout(url, timeout, { mode: 'no-cors' });
+                    return { alive: true, ping: Date.now() - start, config };
+                } catch {}
+=======
             try {
                 const controller = new AbortController();
                 const id = setTimeout(() => controller.abort(), timeout);
@@ -333,7 +419,10 @@
                 return { alive: true, ping: Date.now() - start, config };
             } catch (err) {
                 return { alive: false };
+>>>>>>> main
             }
+
+            return { alive: false };
         }
 
         function renderResults() {
