@@ -83,6 +83,10 @@
             </div>
 
             <div class="bg-blue-50/50 rounded-xl p-3 border border-blue-100">
+                <label class="flex items-center justify-between text-xs mb-3 bg-white/70 border border-blue-100 rounded-lg px-2 py-2">
+                    <span class="text-gray-700 font-bold">حالت کم‌مصرف</span>
+                    <input id="liteModeInput" type="checkbox" class="accent-blue-600 w-4 h-4" checked>
+                </label>
                 <div class="flex justify-between text-xs mb-2">
                     <span class="text-gray-600">تعداد خروجی:</span>
                     <span id="limitDisplay" class="font-bold text-blue-600">20</span>
@@ -112,7 +116,10 @@
 
         <div id="resultsArea" class="hidden space-y-3">
             <div class="flex justify-between items-center px-1">
-                <h3 class="font-bold text-gray-700 text-sm">نتایج (<span id="countVal">0</span>)</h3>
+                <div>
+                    <h3 class="font-bold text-gray-700 text-sm">نتایج (<span id="countVal">0</span>)</h3>
+                    <p id="qualityHint" class="text-[10px] text-gray-500 mt-1">دقت تست: متوسط (مرورگر فقط دسترسی پایه را می‌سنجد)</p>
+                </div>
                 <span class="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full">سالم</span>
             </div>
             
@@ -150,6 +157,11 @@
         ];
 
         let validConfigs = [];
+        const LITE_SOURCE_CAP = 4;
+        const BASELINE_ENDPOINTS = [
+            "https://www.gstatic.com/generate_204",
+            "https://cp.cloudflare.com/generate_204"
+        ];
 
         function renderSources() {
             const grid = document.getElementById('sourcesGrid');
@@ -157,7 +169,7 @@
             sources.forEach((src, idx) => {
                 grid.innerHTML += `
                     <label class="cursor-pointer relative group">
-                        <input type="checkbox" value="${src.url}" class="source-checkbox hidden" checked>
+                        <input type="checkbox" value="${src.url}" class="source-checkbox hidden" ${idx < LITE_SOURCE_CAP ? 'checked' : ''}>
                         <div class="source-card bg-gray-50 rounded-xl p-3 flex items-center gap-3 select-none">
                             <span class="w-2 h-2 rounded-full bg-gray-300 status-dot group-hover:bg-blue-300 transition"></span>
                             <div class="flex-1 min-w-0">
@@ -176,14 +188,20 @@
         }
 
         async function startProcess() {
-            const selectedUrls = Array.from(document.querySelectorAll('.source-checkbox:checked')).map(cb => cb.value);
+            let selectedUrls = Array.from(document.querySelectorAll('.source-checkbox:checked')).map(cb => cb.value);
             const customLinks = document.getElementById('customInput').value.trim();
             const limit = parseInt(document.getElementById('limitInput').value);
             const timeout = parseFloat(document.getElementById('timeoutInput').value) * 1000;
+            const liteMode = document.getElementById('liteModeInput').checked;
+            const pHint = document.getElementById('qualityHint');
 
             if (selectedUrls.length === 0 && !customLinks) {
                 alert("لطفاً حداقل یک منبع انتخاب کنید!");
                 return;
+            }
+
+            if (liteMode && selectedUrls.length > LITE_SOURCE_CAP) {
+                selectedUrls = selectedUrls.slice(0, LITE_SOURCE_CAP);
             }
 
             document.getElementById('startBtn').classList.add('hidden');
@@ -197,14 +215,24 @@
             const pText = document.getElementById('statusText');
 
             let allConfigs = [];
+            let networkProfile = { latency: timeout, quality: "normal" };
 
             if (customLinks) {
                 const lines = customLinks.split('\n');
                 lines.forEach(line => {
-                    if (line.startsWith('http')) selectedUrls.push(line.trim());
-                    else if (line.match(/^(vmess|vless|trojan|ss|hy2)/)) allConfigs.push(line.trim());
+                    const clean = line.trim();
+                    if (!clean) return;
+                    if (clean.startsWith('http')) selectedUrls.push(clean);
+                    else if (clean.match(/^(vmess|vless|trojan|ss|hy2)/)) allConfigs.push(clean);
                 });
             }
+
+            selectedUrls = [...new Set(selectedUrls)];
+
+            pText.innerText = "پروفایل شبکه شما در حال بررسی...";
+            networkProfile = await profileNetwork(timeout);
+            const dynamicTimeout = Math.max(timeout, Math.min(timeout * 2, networkProfile.latency * 1.5));
+            pHint.innerText = `دقت تست: ${networkProfile.quality === "weak" ? "تقریبی" : "خوب"} | تاخیر پایه: ${Math.round(networkProfile.latency)}ms`;
 
             let downloaded = 0;
             for (const url of selectedUrls) {
@@ -213,7 +241,8 @@
                 
                 try {
                     const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-                    const res = await fetch(proxyUrl);
+                    const res = await fetchWithTimeout(proxyUrl, dynamicTimeout + 1500);
+                    if (!res.ok) throw new Error('source failed');
                     const text = await res.text();
                     
                     const decoded = smartDecode(text);
@@ -227,19 +256,22 @@
             
             if (allConfigs.length === 0) {
                 alert("هیچ کانفیگی یافت نشد! (شاید منابع در دسترس نیستند)");
-                window.location.reload();
+                document.getElementById('statusArea').classList.add('hidden');
+                document.getElementById('startBtn').classList.remove('hidden');
                 return;
             }
 
             pText.innerText = `تست اتصال ${allConfigs.length} کانفیگ...`;
             
-            const maxChecks = Math.min(allConfigs.length, limit * 6);
+            const checkMultiplier = liteMode ? 3 : 6;
+            const adaptiveMultiplier = networkProfile.quality === "weak" ? Math.max(2, checkMultiplier - 1) : checkMultiplier;
+            const maxChecks = Math.min(allConfigs.length, limit * adaptiveMultiplier);
             let checked = 0;
-            const batchSize = 10;
+            const batchSize = networkProfile.quality === "weak" ? 3 : (liteMode ? 4 : 10);
 
             for (let i = 0; i < maxChecks; i += batchSize) {
                 const batch = allConfigs.slice(i, i + batchSize);
-                const promises = batch.map(conf => checkConnectivity(conf, timeout));
+                const promises = batch.map(conf => checkConnectivity(conf, dynamicTimeout));
                 const results = await Promise.all(promises);
 
                 results.forEach(res => {
@@ -249,9 +281,9 @@
                 checked += batch.length;
                 const progress = 30 + ((checked / maxChecks) * 70);
                 pBar.style.width = `${progress}%`;
-                pText.innerText = `تست: ${checked} | سالم: ${validConfigs.length}`;
+                pText.innerText = `تست: ${checked} | سالم: ${validConfigs.length} | وضعیت: ${networkProfile.quality === "weak" ? "اینترنت ضعیف" : "نرمال"}`;
 
-                if (validConfigs.length >= limit * 1.5) break;
+                if (validConfigs.length >= (liteMode ? limit : limit * 1.5)) break;
             }
 
             validConfigs.sort((a, b) => a.ping - b.ping);
@@ -277,38 +309,71 @@
             return text.match(/(vmess|vless|trojan|ss|hy2|tuic):\/\/[^\s\n]+/g) || [];
         }
 
+        async function profileNetwork(timeout) {
+            const tests = BASELINE_ENDPOINTS.map(url => timedProbe(url, timeout));
+            const results = await Promise.all(tests);
+            const alive = results.filter(Boolean);
+            if (!alive.length) return { latency: timeout * 1.2, quality: "weak" };
+
+            const avg = alive.reduce((acc, val) => acc + val, 0) / alive.length;
+            const quality = avg > 1200 ? "weak" : "normal";
+            return { latency: avg, quality };
+        }
+
+        async function timedProbe(url, timeout) {
+            const start = Date.now();
+            try {
+                await fetchWithTimeout(url, timeout, { mode: 'no-cors' });
+                return Date.now() - start;
+            } catch {
+                return null;
+            }
+        }
+
+        async function fetchWithTimeout(url, timeout, options = {}) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeout);
+            try {
+                return await fetch(url, { ...options, signal: controller.signal });
+            } finally {
+                clearTimeout(id);
+            }
+        }
+
+        function parseConfigEndpoint(config) {
+            try {
+                if (config.startsWith('vmess://')) {
+                    const json = JSON.parse(smartDecode(config.replace('vmess://', '')));
+                    return { host: json.add, port: parseInt(json.port || 80) };
+                }
+
+                const match = config.match(/@([^:#?]+):(\d+)/) || config.match(/\/\/([^:#?]+):(\d+)/);
+                if (!match) return null;
+                return { host: match[1], port: parseInt(match[2]) };
+            } catch {
+                return null;
+            }
+        }
+
         async function checkConnectivity(config, timeout) {
             const start = Date.now();
-            let host = '', port = 80;
+            const endpoint = parseConfigEndpoint(config);
+            if (!endpoint || !endpoint.host) return { alive: false };
 
-            try {
-                if (config.startsWith('vmess')) {
-                    const b64 = config.replace('vmess://', '');
-                    const json = JSON.parse(smartDecode(b64));
-                    host = json.add; port = json.port;
-                } else {
-                    const match = config.match(/@([^:]+):(\d+)/) || config.match(/\/\/([^:]+):(\d+)/);
-                    if (match) { host = match[1]; port = match[2]; }
-                }
-            } catch { return { alive: false }; }
+            const { host, port } = endpoint;
+            const preferHttps = [443, 8443, 2053, 2083].includes(port);
+            const probes = preferHttps
+                ? [`https://${host}:${port}`, `http://${host}:${port}`]
+                : [`http://${host}:${port}`, `https://${host}:${port}`];
 
-            if (!host) return { alive: false };
-
-            try {
-                const controller = new AbortController();
-                const id = setTimeout(() => controller.abort(), timeout);
-                
-                await fetch(`http://${host}:${port}`, { 
-                    mode: 'no-cors', 
-                    signal: controller.signal 
-                });
-                
-                clearTimeout(id);
-                return { alive: true, ping: Date.now() - start, config };
-            } catch (err) {
-                if (err.name === 'AbortError') return { alive: false };
-                return { alive: true, ping: Date.now() - start, config };
+            for (const url of probes) {
+                try {
+                    await fetchWithTimeout(url, timeout, { mode: 'no-cors' });
+                    return { alive: true, ping: Date.now() - start, config };
+                } catch {}
             }
+
+            return { alive: false };
         }
 
         function renderResults() {
