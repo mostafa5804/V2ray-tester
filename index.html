@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="تستر هوشمند کانفیگ VPN - بررسی و رتبه‌بندی کانفیگ‌های V2Ray، Vless، Vmess و Trojan">
+    <meta name="keywords" content="vpn config tester, v2ray, vless, vmess, trojan, تستر کانفیگ">
     <title>تستر هوشمند کانفیگ</title>
 
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
@@ -15,7 +17,7 @@
                 extend: {
                     fontFamily: { sans: ['Vazirmatn', 'sans-serif'] },
                     colors: {
-                        primary: '#3b82f6', // آبی
+                        primary: '#3b82f6',
                         secondary: '#eff6ff',
                     }
                 }
@@ -56,7 +58,7 @@
             </div>
             <h1 class="font-bold text-gray-800 text-lg">تستر کانفیگ</h1>
         </div>
-        <div class="text-xs font-mono bg-gray-100 text-gray-500 px-2 py-1 rounded">Update: New Sources</div>
+        <div class="text-xs font-mono bg-gray-100 text-gray-500 px-2 py-1 rounded">v2.0 Fixed</div>
     </header>
 
     <main class="max-w-lg mx-auto p-4 space-y-5">
@@ -67,8 +69,8 @@
                     <i class="fas fa-server text-blue-500"></i> منابع انتخابی شما
                 </h2>
                 <div class="flex gap-2">
-                    <button onclick="toggleSources(true)" class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded hover:bg-blue-100">همه</button>
-                    <button onclick="toggleSources(false)" class="text-xs bg-gray-50 text-gray-600 px-2 py-1 rounded hover:bg-gray-100">هیچکدام</button>
+                    <button onclick="toggleSources(true)" class="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded hover:bg-blue-100" aria-label="انتخاب همه منابع">همه</button>
+                    <button onclick="toggleSources(false)" class="text-xs bg-gray-50 text-gray-600 px-2 py-1 rounded hover:bg-gray-100" aria-label="لغو انتخاب همه">هیچکدام</button>
                 </div>
             </div>
 
@@ -78,32 +80,37 @@
 
         <section class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-4">
             <div>
-                <label class="text-xs font-bold text-gray-500 mb-1 block">لینک دستی (اختیاری)</label>
-                <textarea id="customInput" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs font-mono focus:border-blue-500 outline-none h-16 placeholder-gray-400 dir-ltr" placeholder="vless://..."></textarea>
+                <label for="customInput" class="text-xs font-bold text-gray-500 mb-1 block">لینک دستی (اختیاری)</label>
+                <textarea id="customInput" class="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs font-mono focus:border-blue-500 outline-none h-16 placeholder-gray-400 dir-ltr" placeholder="vless://..." aria-label="ورود لینک دستی"></textarea>
             </div>
 
             <div class="bg-blue-50/50 rounded-xl p-3 border border-blue-100">
                 <label class="flex items-center justify-between text-xs mb-3 bg-white/70 border border-blue-100 rounded-lg px-2 py-2">
                     <span class="text-gray-700 font-bold">حالت کم‌مصرف</span>
-                    <input id="liteModeInput" type="checkbox" class="accent-blue-600 w-4 h-4" checked>
+                    <input id="liteModeInput" type="checkbox" class="accent-blue-600 w-4 h-4" checked aria-label="فعال‌سازی حالت کم‌مصرف">
                 </label>
                 <div class="flex justify-between text-xs mb-2">
                     <span class="text-gray-600">تعداد خروجی:</span>
                     <span id="limitDisplay" class="font-bold text-blue-600">20</span>
                 </div>
-                <input type="range" id="limitInput" min="5" max="200" value="20" class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500" oninput="document.getElementById('limitDisplay').innerText = this.value">
+                <input type="range" id="limitInput" min="5" max="200" value="20" class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500" oninput="document.getElementById('limitDisplay').innerText = this.value" aria-label="تنظیم تعداد خروجی">
 
                 <div class="flex justify-between text-xs mt-3 mb-2">
                     <span class="text-gray-600">تایم‌اوت (ثانیه):</span>
                     <span id="timeoutDisplay" class="font-bold text-blue-600">2.0</span>
                 </div>
-                <input type="range" id="timeoutInput" min="0.5" max="5" step="0.5" value="2.0" class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500" oninput="document.getElementById('timeoutDisplay').innerText = this.value">
+                <input type="range" id="timeoutInput" min="0.5" max="5" step="0.5" value="2.0" class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500" oninput="document.getElementById('timeoutDisplay').innerText = this.value" aria-label="تنظیم تایم‌اوت">
             </div>
         </section>
 
-        <button id="startBtn" onclick="startProcess()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-200 transition-transform active:scale-95 flex justify-center items-center gap-2 text-base">
+        <button id="startBtn" onclick="startProcess()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-blue-200 transition-transform active:scale-95 flex justify-center items-center gap-2 text-base" aria-label="شروع تست کانفیگ‌ها">
             <span>شروع تست واقعی</span>
             <i class="fas fa-play text-xs"></i>
+        </button>
+
+        <button id="cancelBtn" onclick="cancelProcess()" class="hidden w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-xl shadow-lg transition-transform active:scale-95 flex justify-center items-center gap-2 text-base" aria-label="لغو فرآیند">
+            <span>لغو فرآیند</span>
+            <i class="fas fa-times text-xs"></i>
         </button>
 
         <div id="statusArea" class="hidden text-center py-4">
@@ -114,14 +121,25 @@
             </div>
         </div>
 
+        <div id="errorArea" class="hidden">
+            <div class="bg-red-50 border border-red-200 rounded-xl p-4 text-sm">
+                <div class="flex items-start gap-3">
+                    <i class="fas fa-exclamation-triangle text-red-500 mt-0.5"></i>
+                    <div>
+                        <div class="font-bold text-red-700 mb-1">خطا در اجرا</div>
+                        <div id="errorText" class="text-red-600 text-xs"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div id="resultsArea" class="hidden space-y-3">
             <div class="flex justify-between items-center px-1">
                 <div>
                     <h3 class="font-bold text-gray-700 text-sm">نتایج (<span id="countVal">0</span>)</h3>
-                    <p id="qualityHint" class="text-[10px] text-gray-500 mt-1">دقت تست: متوسط (مرورگر فقط دسترسی پایه را می‌سنجد)</p>
+                    <p id="qualityHint" class="text-[10px] text-gray-500 mt-1">آماده برای نمایش نتایج</p>
                 </div>
                 <span class="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full">امتیازدهی</span>
-
             </div>
 
             <div id="cardsContainer" class="space-y-2"></div>
@@ -131,18 +149,20 @@
 
     <div id="actionBar" class="hidden fixed bottom-5 left-0 w-full px-4 z-40">
         <div class="max-w-lg mx-auto bg-white border border-gray-200 p-2 rounded-2xl shadow-xl flex gap-2">
-            <button onclick="copyAll()" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md active:bg-blue-700 transition">
+            <button onclick="copyAll()" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold text-sm shadow-md active:bg-blue-700 transition" aria-label="کپی همه کانفیگ‌ها">
                 کپی یکجا
             </button>
-            <button onclick="downloadSub()" class="flex-1 bg-white text-gray-700 border border-gray-200 py-3 rounded-xl font-bold text-sm shadow-sm hover:bg-gray-50 transition">
+            <button onclick="downloadSub()" class="flex-1 bg-white text-gray-700 border border-gray-200 py-3 rounded-xl font-bold text-sm shadow-sm hover:bg-gray-50 transition" aria-label="دانلود فایل ساب‌اسکریپشن">
                 دانلود فایل
             </button>
         </div>
     </div>
 
-
     <script>
-        const sources = [
+        'use strict';
+
+        // ==================== Constants ====================
+        const SOURCES = [
             { name: "AvenCores - Mirror 1", url: "https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/main/githubmirror/1.txt" },
             { name: "AvenCores - Mirror 2", url: "https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/main/githubmirror/2.txt" },
             { name: "AvenCores - Mirror 3", url: "https://raw.githubusercontent.com/AvenCores/goida-vpn-configs/main/githubmirror/3.txt" },
@@ -158,39 +178,91 @@
         ];
 
         const LITE_SOURCE_CAP = 4;
- codex/fix-syntax-error-from-merge-conflict-vseb7x
-
-        let rankedConfigs = [];
-
- main
+        const MAX_PORT = 65535;
+        const MIN_PORT = 1;
+        
         const BASELINE_ENDPOINTS = [
             'https://www.gstatic.com/generate_204',
             'https://cp.cloudflare.com/generate_204'
         ];
- codex/fix-syntax-error-from-merge-conflict-vseb7x
 
+        const SCORE_WEIGHTS = {
+            ALIVE: 55,
+            CONNECT_OK: 20,
+            DNS_OK: 10,
+            LATENCY_MAX: 15,
+            TLS: 5,
+            SNI: 3,
+            NETWORK: 2,
+            PROTOCOL: 2
+        };
+
+        // ==================== State ====================
         let rankedConfigs = [];
         let sourceStats = [];
+        let processCancelled = false;
 
- main
+        // ==================== Utility Functions ====================
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
 
+        function sanitizeUrl(url) {
+            try {
+                const parsed = new URL(url);
+                if (!['http:', 'https:'].includes(parsed.protocol)) {
+                    return null;
+                }
+                return parsed.href;
+            } catch {
+                return null;
+            }
+        }
+
+        function isValidPort(port) {
+            return Number.isInteger(port) && port >= MIN_PORT && port <= MAX_PORT;
+        }
+
+        function logError(context, error) {
+            console.error(`[${context}]`, error);
+        }
+
+        function showError(message) {
+            document.getElementById('errorText').textContent = message;
+            document.getElementById('errorArea').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('errorArea').classList.add('hidden');
+            }, 5000);
+        }
+
+        // ==================== UI Functions ====================
+        
         function renderSources() {
             const grid = document.getElementById('sourcesGrid');
             grid.innerHTML = '';
-            sources.forEach((src, idx) => {
-                grid.innerHTML += `
-                    <label class="cursor-pointer relative group">
-                        <input type="checkbox" value="${src.url}" class="source-checkbox hidden" ${idx < LITE_SOURCE_CAP ? 'checked' : ''}>
-                        <div class="source-card bg-gray-50 rounded-xl p-3 flex items-center gap-3 select-none">
-                            <span class="w-2 h-2 rounded-full bg-gray-300 status-dot group-hover:bg-blue-300 transition"></span>
-                            <div class="flex-1 min-w-0">
-                                <div class="font-bold text-xs text-gray-700 truncate">${src.name}</div>
-                                <div class="text-[9px] text-gray-400 truncate">${src.url.split('/').pop()}</div>
-                            </div>
-                            <i class="fas fa-check-circle text-blue-500 opacity-0 check-icon text-lg transition-transform scale-50"></i>
+            
+            SOURCES.forEach((src, idx) => {
+                const isChecked = idx < LITE_SOURCE_CAP;
+                const escapedName = escapeHtml(src.name);
+                const escapedFile = escapeHtml(src.url.split('/').pop());
+                
+                const label = document.createElement('label');
+                label.className = 'cursor-pointer relative group';
+                label.innerHTML = `
+                    <input type="checkbox" value="${escapeHtml(src.url)}" class="source-checkbox hidden" ${isChecked ? 'checked' : ''} aria-label="انتخاب ${escapedName}">
+                    <div class="source-card bg-gray-50 rounded-xl p-3 flex items-center gap-3 select-none">
+                        <span class="w-2 h-2 rounded-full bg-gray-300 status-dot group-hover:bg-blue-300 transition"></span>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-bold text-xs text-gray-700 truncate">${escapedName}</div>
+                            <div class="text-[9px] text-gray-400 truncate">${escapedFile}</div>
                         </div>
-                    </label>
+                        <i class="fas fa-check-circle text-blue-500 opacity-0 check-icon text-lg transition-transform scale-50"></i>
+                    </div>
                 `;
+                grid.appendChild(label);
             });
         }
 
@@ -199,23 +271,27 @@
         }
 
         function setProgress(text, percent) {
-            document.getElementById('statusText').innerText = text;
+            document.getElementById('statusText').textContent = text;
             document.getElementById('progressBar').style.width = `${Math.max(0, Math.min(100, percent))}%`;
         }
 
-
-        function assertNoConflictMarkers() {
-            const html = document.documentElement.innerHTML;
-            const conflictPattern = /^\s*(<<<<<<<\s+.+|=======|>>>>>>>\s+.+|main|codex\/optimize-code-performance-[A-Za-z0-9-]+)\s*$/m;
-            if (conflictPattern.test(html)) {
-                setProgress('خطا: تداخل گیت در فایل پیدا شد. لطفاً conflict ها را کامل resolve کنید.', 100);
-                document.getElementById('statusArea').classList.remove('hidden');
-                throw new Error('Git merge conflict markers detected in index.html');
-            }
+        function updateQualityHint(summary) {
+            const parts = [
+                `دریافتی: ${summary.totalFetched}`,
+                `منحصربه‌فرد: ${summary.uniqueConfigs}`,
+                `بررسی endpoint: ${summary.checked}/${summary.totalChecks}`,
+                `سالم: ${summary.alive}`
+            ];
+            document.getElementById('qualityHint').textContent = parts.join(' | ');
         }
 
+        // ==================== Config Processing ====================
+        
         function splitAndCleanLines(input) {
-            return input.split('\n').map(v => v.trim()).filter(Boolean);
+            if (!input || typeof input !== 'string') return [];
+            return input.split('\n')
+                .map(v => v.trim())
+                .filter(Boolean);
         }
 
         function decodeBase64Safe(value) {
@@ -223,8 +299,9 @@
                 const normalized = value.replace(/-/g, '+').replace(/_/g, '/').replace(/\s/g, '');
                 const raw = atob(normalized);
                 const bytes = Uint8Array.from(raw, c => c.charCodeAt(0));
-                return new TextDecoder().decode(bytes);
-            } catch {
+                return new TextDecoder('utf-8', { fatal: false }).decode(bytes);
+            } catch (e) {
+                logError('decodeBase64Safe', e);
                 return value;
             }
         }
@@ -237,6 +314,7 @@
         }
 
         function extractConfigs(text) {
+            if (!text) return [];
             return text.match(/(vmess|vless|trojan|ss|hy2|tuic):\/\/[^\s\n]+/gi) || [];
         }
 
@@ -244,9 +322,14 @@
             try {
                 if (config.startsWith('vmess://')) {
                     const json = JSON.parse(decodeBase64Safe(config.slice(8)));
+                    const host = String(json.add || '').trim();
+                    const port = parseInt(json.port || 443, 10);
+                    
+                    if (!host || !isValidPort(port)) return null;
+                    
                     return {
-                        host: String(json.add || '').trim(),
-                        port: parseInt(json.port || 443, 10),
+                        host,
+                        port,
                         network: json.net || '',
                         tls: json.tls || '',
                         sni: json.sni || json.host || ''
@@ -256,72 +339,109 @@
                 const hostPort = config.match(/@([^:#?]+):(\d+)/) || config.match(/\/\/([^:#?]+):(\d+)/);
                 if (!hostPort) return null;
 
+                const host = hostPort[1];
+                const port = parseInt(hostPort[2], 10);
+                
+                if (!host || !isValidPort(port)) return null;
+
                 let search = '';
                 try {
                     const normalized = config.replace(/^(vless|trojan|ss|hy2|tuic):\/\//, 'https://');
                     const parsed = new URL(normalized);
                     search = parsed.search || '';
-                } catch {}
+                } catch (e) {
+                    logError('parseEndpoint URL', e);
+                }
 
                 const params = new URLSearchParams(search);
                 return {
-                    host: hostPort[1],
-                    port: parseInt(hostPort[2], 10),
+                    host,
+                    port,
                     network: params.get('type') || '',
                     tls: params.get('security') || params.get('tls') || '',
                     sni: params.get('sni') || params.get('host') || ''
                 };
-            } catch {
+            } catch (e) {
+                logError('parseEndpoint', e);
                 return null;
             }
         }
 
+        // ==================== Network Functions ====================
+        
         async function fetchWithTimeout(url, timeout, options = {}) {
             const controller = new AbortController();
             const timer = setTimeout(() => controller.abort(), timeout);
+            
             try {
-                return await fetch(url, { ...options, signal: controller.signal });
-            } finally {
+                const response = await fetch(url, { 
+                    ...options, 
+                    signal: controller.signal 
+                });
                 clearTimeout(timer);
+                return response;
+            } catch (e) {
+                clearTimeout(timer);
+                throw e;
             }
         }
 
         async function fetchSource(url, timeout) {
+            const sanitized = sanitizeUrl(url);
+            if (!sanitized) {
+                return { configs: [], ok: false, via: '-', error: 'Invalid URL' };
+            }
+
             const targets = [
-                `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-                `https://r.jina.ai/http://${url.replace(/^https?:\/\//, '')}`,
-                url
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(sanitized)}`,
+                `https://r.jina.ai/http://${sanitized.replace(/^https?:\/\//, '')}`,
+                sanitized
             ];
 
             for (const target of targets) {
                 try {
                     const response = await fetchWithTimeout(target, timeout);
                     if (!response.ok) continue;
+                    
                     const text = await response.text();
                     const decoded = maybeDecodeSubscription(text);
+                    const configs = extractConfigs(decoded);
+                    
                     return {
-                        configs: extractConfigs(decoded),
+                        configs,
                         ok: true,
                         via: target
                     };
-                } catch {}
+                } catch (e) {
+                    logError(`fetchSource ${target}`, e);
+                }
             }
 
-            return { configs: [], ok: false, via: '-' };
+            return { configs: [], ok: false, via: '-', error: 'All proxies failed' };
         }
 
         async function measureBaseline(timeout) {
             const timings = [];
+            
             for (const url of BASELINE_ENDPOINTS) {
                 const start = performance.now();
                 try {
                     await fetchWithTimeout(url, timeout, { mode: 'no-cors' });
                     timings.push(performance.now() - start);
-                } catch {}
+                } catch (e) {
+                    logError('measureBaseline', e);
+                }
             }
-            if (!timings.length) return { latency: timeout, quality: 'weak' };
+            
+            if (!timings.length) {
+                return { latency: timeout, quality: 'weak' };
+            }
+            
             const avg = timings.reduce((a, b) => a + b, 0) / timings.length;
-            return { latency: avg, quality: avg > 1200 ? 'weak' : 'normal' };
+            return { 
+                latency: avg, 
+                quality: avg > 1200 ? 'weak' : 'normal' 
+            };
         }
 
         function endpointKey(ep) {
@@ -340,12 +460,19 @@
                     const response = await fetchWithTimeout(url, timeout, {
                         headers: { accept: 'application/dns-json' }
                     });
+                    
                     if (!response.ok) continue;
+                    
                     const data = await response.json();
                     if (Array.isArray(data.Answer) && data.Answer.length > 0) {
-                        return { ok: true, latency: Math.max(1, Math.round(performance.now() - start)) };
+                        return { 
+                            ok: true, 
+                            latency: Math.max(1, Math.round(performance.now() - start)) 
+                        };
                     }
-                } catch {}
+                } catch (e) {
+                    logError('resolveHost', e);
+                }
             }
 
             return { ok: false, latency: timeout };
@@ -354,6 +481,7 @@
         async function probeEndpoint(host, port, timeout) {
             const dnsResult = await resolveHost(host, timeout);
             const start = performance.now();
+            
             const urls = [
                 `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://${host}:${port}`)}`,
                 `https://api.allorigins.win/raw?url=${encodeURIComponent(`http://${host}:${port}`)}`
@@ -367,11 +495,14 @@
                         directOk = true;
                         break;
                     }
-                } catch {}
+                } catch (e) {
+                    logError('probeEndpoint', e);
+                }
             }
 
             const probeLatency = Math.max(1, Math.round(performance.now() - start));
             const alive = directOk || dnsResult.ok;
+            
             return {
                 alive,
                 dnsOk: dnsResult.ok,
@@ -380,52 +511,51 @@
             };
         }
 
+        // ==================== Scoring ====================
+        
         function scoreConfig(config, endpoint, probe, baselineLatency) {
             let score = 0;
             const proto = config.split('://')[0].toLowerCase();
 
-            if (probe.alive) score += 55;
-            if (probe.connectOk) score += 20;
-            if (probe.dnsOk) score += 10;
+            if (probe.alive) score += SCORE_WEIGHTS.ALIVE;
+            if (probe.connectOk) score += SCORE_WEIGHTS.CONNECT_OK;
+            if (probe.dnsOk) score += SCORE_WEIGHTS.DNS_OK;
 
-            const latencyScore = Math.max(0, 15 - Math.round((probe.latency / Math.max(250, baselineLatency)) * 6));
+            const latencyScore = Math.max(
+                0, 
+                SCORE_WEIGHTS.LATENCY_MAX - Math.round((probe.latency / Math.max(250, baselineLatency)) * 6)
+            );
             score += latencyScore;
 
-            if (endpoint.tls && endpoint.tls !== 'none') score += 5;
-            if (endpoint.sni) score += 3;
-            if (endpoint.network && ['ws', 'grpc'].includes(endpoint.network)) score += 2;
-            if (proto === 'vless' || proto === 'trojan') score += 2;
+            if (endpoint.tls && endpoint.tls !== 'none') score += SCORE_WEIGHTS.TLS;
+            if (endpoint.sni) score += SCORE_WEIGHTS.SNI;
+            if (endpoint.network && ['ws', 'grpc'].includes(endpoint.network)) score += SCORE_WEIGHTS.NETWORK;
+            if (proto === 'vless' || proto === 'trojan') score += SCORE_WEIGHTS.PROTOCOL;
 
             return Math.max(0, Math.min(100, score));
         }
- codex/fix-syntax-error-from-merge-conflict-vseb7x
 
-        function updateQualityHint(summary) {
-            const parts = [
-                `دریافتی: ${summary.totalFetched}`,
-                `منحصربه‌فرد: ${summary.uniqueConfigs}`,
-                `بررسی endpoint: ${summary.checked}/${summary.totalChecks}`,
-                `سالم: ${summary.alive}`
-            ];
-            document.getElementById('qualityHint').innerText = parts.join(' | ');
+        // ==================== Main Process ====================
+        
+        function cancelProcess() {
+            processCancelled = true;
+            setProgress('در حال لغو...', 100);
         }
 
-
- main
         async function startProcess() {
-            let selectedUrls = Array.from(document.querySelectorAll('.source-checkbox:checked')).map(cb => cb.value);
+            processCancelled = false;
+            
+            let selectedUrls = Array.from(document.querySelectorAll('.source-checkbox:checked'))
+                .map(cb => cb.value)
+                .filter(url => sanitizeUrl(url));
+                
             const customInput = document.getElementById('customInput').value.trim();
             const limit = parseInt(document.getElementById('limitInput').value, 10);
             const timeoutMs = parseFloat(document.getElementById('timeoutInput').value) * 1000;
             const liteMode = document.getElementById('liteModeInput').checked;
- codex/fix-syntax-error-from-merge-conflict-vseb7x
-            const startBtn = document.getElementById('startBtn');
-
-            const qualityHint = document.getElementById('qualityHint');
- main
 
             if (!selectedUrls.length && !customInput) {
-                alert('حداقل یک منبع یا کانفیگ دستی وارد کنید.');
+                showError('حداقل یک منبع یا کانفیگ دستی وارد کنید.');
                 return;
             }
 
@@ -433,226 +563,268 @@
                 selectedUrls = selectedUrls.slice(0, LITE_SOURCE_CAP);
             }
 
-            startBtn.classList.add('hidden');
+            // UI Updates
+            document.getElementById('startBtn').classList.add('hidden');
+            document.getElementById('cancelBtn').classList.remove('hidden');
             document.getElementById('statusArea').classList.remove('hidden');
             document.getElementById('resultsArea').classList.add('hidden');
             document.getElementById('actionBar').classList.add('hidden');
+            document.getElementById('errorArea').classList.add('hidden');
             document.getElementById('cardsContainer').innerHTML = '';
+            
             rankedConfigs = [];
             sourceStats = [];
 
-            setProgress('ارزیابی وضعیت اینترنت (بدون VPN)...', 3);
-            const baseline = await measureBaseline(timeoutMs);
-            const dynamicTimeout = Math.max(timeoutMs, Math.min(timeoutMs * 2, baseline.latency * 1.8));
+            try {
+                setProgress('ارزیابی وضعیت اینترنت (بدون VPN)...', 3);
+                const baseline = await measureBaseline(timeoutMs);
+                const dynamicTimeout = Math.max(timeoutMs, Math.min(timeoutMs * 2, baseline.latency * 1.8));
 
-            const knownSources = new Map(sources.map(s => [s.url, s.name]));
-            const manualConfigs = [];
-            if (customInput) {
-                for (const line of splitAndCleanLines(customInput)) {
-                    if (line.startsWith('http')) selectedUrls.push(line);
- codex/fix-syntax-error-from-merge-conflict-vseb7x
-                    else if (/^(vmess|vless|trojan|ss|hy2|tuic):\/\//i.test(line)) manualConfigs.push(line);
+                if (processCancelled) throw new Error('cancelled');
+
+                const knownSources = new Map(SOURCES.map(s => [s.url, s.name]));
+                const manualConfigs = [];
+                
+                if (customInput) {
+                    for (const line of splitAndCleanLines(customInput)) {
+                        if (line.startsWith('http')) {
+                            const sanitized = sanitizeUrl(line);
+                            if (sanitized) selectedUrls.push(sanitized);
+                        } else if (/^(vmess|vless|trojan|ss|hy2|tuic):\/\//i.test(line)) {
+                            manualConfigs.push(line);
+                        }
+                    }
                 }
-            }
 
-            selectedUrls = Array.from(new Set(selectedUrls));
-            const allConfigs = [...manualConfigs];
+                selectedUrls = Array.from(new Set(selectedUrls));
+                const allConfigs = [...manualConfigs];
 
-            for (let i = 0; i < selectedUrls.length; i++) {
-                const url = selectedUrls[i];
-                const stats = {
-                    name: knownSources.get(url) || `Custom ${i + 1}`,
-                    url,
-                    fetched: 0,
-                    ok: false
-                };
-                setProgress(`دریافت لینک ${i + 1}/${selectedUrls.length}: ${stats.name}`, 8 + ((i / Math.max(1, selectedUrls.length)) * 32));
-                const result = await fetchSource(url, dynamicTimeout + 1000);
-                stats.fetched = result.configs.length;
-                stats.ok = result.ok;
-                sourceStats.push(stats);
-                allConfigs.push(...result.configs);
+                for (let i = 0; i < selectedUrls.length; i++) {
+                    if (processCancelled) throw new Error('cancelled');
+                    
+                    const url = selectedUrls[i];
+                    const stats = {
+                        name: knownSources.get(url) || `Custom ${i + 1}`,
+                        url,
+                        fetched: 0,
+                        ok: false
+                    };
+                    
+                    setProgress(
+                        `دریافت لینک ${i + 1}/${selectedUrls.length}: ${stats.name}`, 
+                        8 + ((i / Math.max(1, selectedUrls.length)) * 32)
+                    );
+                    
+                    const result = await fetchSource(url, dynamicTimeout + 1000);
+                    stats.fetched = result.configs.length;
+                    stats.ok = result.ok;
+                    sourceStats.push(stats);
+                    allConfigs.push(...result.configs);
 
-                const totalFetched = sourceStats.reduce((acc, s) => acc + s.fetched, 0) + manualConfigs.length;
-                updateQualityHint({ totalFetched, uniqueConfigs: 0, checked: 0, totalChecks: 0, alive: 0 });
-            }
-
-            const uniqueConfigs = Array.from(new Set(allConfigs.map(v => v.trim()).filter(Boolean)));
-            if (!uniqueConfigs.length) {
-                setProgress('هیچ کانفیگی دریافت نشد. لینک‌ها یا اینترنت را بررسی کنید.', 100);
-                updateQualityHint({ totalFetched: 0, uniqueConfigs: 0, checked: 0, totalChecks: 0, alive: 0 });
-                startBtn.classList.remove('hidden');
-
-                    else if (/^(vmess|vless|trojan|ss|hy2|tuic):\/\//i.test(line)) allConfigs.push(line);
+                    const totalFetched = sourceStats.reduce((acc, s) => acc + s.fetched, 0) + manualConfigs.length;
+                    updateQualityHint({ 
+                        totalFetched, 
+                        uniqueConfigs: 0, 
+                        checked: 0, 
+                        totalChecks: 0, 
+                        alive: 0 
+                    });
                 }
-            }
 
-            let fetched = 0;
-            for (const url of selectedUrls) {
-                setProgress(`دریافت منبع ${fetched + 1} از ${selectedUrls.length}...`, 5 + (fetched / Math.max(1, selectedUrls.length)) * 20);
-                const items = await fetchSource(url, dynamicTimeout);
-                allConfigs.push(...items);
-                fetched++;
-            }
+                if (processCancelled) throw new Error('cancelled');
 
-            const uniqueConfigs = Array.from(new Set(allConfigs));
-            if (!uniqueConfigs.length) {
-                setProgress('هیچ کانفیگ معتبری یافت نشد.', 100);
-                document.getElementById('startBtn').classList.remove('hidden');
-main
-                return;
-            }
+                const uniqueConfigs = Array.from(new Set(allConfigs.map(v => v.trim()).filter(Boolean)));
+                
+                if (!uniqueConfigs.length) {
+                    throw new Error('هیچ کانفیگی دریافت نشد. لینک‌ها یا اینترنت را بررسی کنید.');
+                }
 
-            const parsed = uniqueConfigs
-                .map(config => ({ config, endpoint: parseEndpoint(config) }))
- codex/fix-syntax-error-from-merge-conflict-vseb7x
-                .filter(item => item.endpoint && item.endpoint.host && Number.isFinite(item.endpoint.port));
+                const parsed = uniqueConfigs
+                    .map(config => ({ config, endpoint: parseEndpoint(config) }))
+                    .filter(item => item.endpoint && item.endpoint.host && isValidPort(item.endpoint.port));
 
-            if (!parsed.length) {
-                setProgress('کانفیگ‌ها دریافت شدند ولی endpoint معتبر استخراج نشد.', 100);
-                updateQualityHint({ totalFetched: allConfigs.length, uniqueConfigs: uniqueConfigs.length, checked: 0, totalChecks: 0, alive: 0 });
-                startBtn.classList.remove('hidden');
+                if (!parsed.length) {
+                    throw new Error('کانفیگ‌ها دریافت شدند ولی endpoint معتبر استخراج نشد.');
+                }
 
-                .filter(item => item.endpoint && item.endpoint.host && item.endpoint.port);
+                const endpointMap = new Map();
+                parsed.forEach(item => endpointMap.set(endpointKey(item.endpoint), item.endpoint));
+                const endpoints = Array.from(endpointMap.values());
 
-            if (!parsed.length) {
-                setProgress('endpoint معتبری برای تست پیدا نشد.', 100);
-                document.getElementById('startBtn').classList.remove('hidden');
- main
-                return;
-            }
+                const maxEndpointChecks = Math.min(endpoints.length, liteMode ? limit * 4 : limit * 8);
+                const batchSize = baseline.quality === 'weak' ? 3 : (liteMode ? 6 : 12);
 
-            const endpointMap = new Map();
-            parsed.forEach(item => endpointMap.set(endpointKey(item.endpoint), item.endpoint));
-            const endpoints = Array.from(endpointMap.values());
+                const probeResults = new Map();
+                let checked = 0;
+                let aliveCount = 0;
 
- codex/fix-syntax-error-from-merge-conflict-vseb7x
-            const maxEndpointChecks = Math.min(endpoints.length, liteMode ? limit * 4 : limit * 8);
-            const batchSize = baseline.quality === 'weak' ? 3 : (liteMode ? 6 : 12);
+                for (let i = 0; i < maxEndpointChecks; i += batchSize) {
+                    if (processCancelled) throw new Error('cancelled');
+                    
+                    const batch = endpoints.slice(i, i + batchSize);
+                    const results = await Promise.all(
+                        batch.map(ep => probeEndpoint(ep.host, ep.port, dynamicTimeout))
+                    );
 
-            const maxEndpointChecks = Math.min(endpoints.length, liteMode ? limit * 3 : limit * 6);
-            const batchSize = baseline.quality === 'weak' ? 3 : (liteMode ? 5 : 12);
- main
+                    batch.forEach((ep, idx) => {
+                        const probe = results[idx];
+                        probeResults.set(endpointKey(ep), probe);
+                        if (probe.alive) aliveCount++;
+                    });
 
-            const probeResults = new Map();
-            let checked = 0;
-            let aliveCount = 0;
+                    checked += batch.length;
+                    const progress = 45 + ((checked / maxEndpointChecks) * 50);
+                    setProgress(`بررسی endpoint: ${checked}/${maxEndpointChecks} | سالم: ${aliveCount}`, progress);
+                    
+                    updateQualityHint({
+                        totalFetched: allConfigs.length,
+                        uniqueConfigs: uniqueConfigs.length,
+                        checked,
+                        totalChecks: maxEndpointChecks,
+                        alive: aliveCount
+                    });
+                }
 
-            for (let i = 0; i < maxEndpointChecks; i += batchSize) {
-                const batch = endpoints.slice(i, i + batchSize);
-                const results = await Promise.all(batch.map(ep => probeEndpoint(ep.host, ep.port, dynamicTimeout)));
+                if (processCancelled) throw new Error('cancelled');
 
- codex/fix-syntax-error-from-merge-conflict-vseb7x
-                batch.forEach((ep, idx) => {
-                    const probe = results[idx];
-                    probeResults.set(endpointKey(ep), probe);
-                    if (probe.alive) aliveCount++;
+                rankedConfigs = parsed.map(item => {
+                    const probe = probeResults.get(endpointKey(item.endpoint)) || { 
+                        alive: false, 
+                        dnsOk: false, 
+                        connectOk: false, 
+                        latency: dynamicTimeout 
+                    };
+                    
+                    return {
+                        config: item.config,
+                        ping: probe.latency,
+                        alive: probe.alive,
+                        score: scoreConfig(item.config, item.endpoint, probe, baseline.latency)
+                    };
                 });
 
-                checked += batch.length;
-                const progress = 45 + ((checked / maxEndpointChecks) * 50);
-                setProgress(`بررسی endpoint: ${checked}/${maxEndpointChecks} | سالم: ${aliveCount}`, progress);
-                updateQualityHint({
-                    totalFetched: allConfigs.length,
-                    uniqueConfigs: uniqueConfigs.length,
-                    checked,
-                    totalChecks: maxEndpointChecks,
-                    alive: aliveCount
-                });
+                rankedConfigs.sort((a, b) => b.score - a.score || a.ping - b.ping);
+                rankedConfigs = rankedConfigs.slice(0, limit);
 
-                checked += batch.length;
-                const progress = 40 + (checked / maxEndpointChecks) * 55;
-                const aliveCount = Array.from(probeResults.values()).filter(v => v.alive).length;
-                setProgress(`تحلیل endpoint: ${checked}/${maxEndpointChecks} | قابل دسترس: ${aliveCount}`, progress);
- main
+                renderResults();
+                setProgress('تحلیل کامل شد.', 100);
+                
+                document.getElementById('statusArea').classList.add('hidden');
+                document.getElementById('resultsArea').classList.remove('hidden');
+                document.getElementById('actionBar').classList.remove('hidden');
+
+            } catch (error) {
+                if (error.message === 'cancelled') {
+                    setProgress('فرآیند لغو شد.', 100);
+                } else {
+                    logError('startProcess', error);
+                    showError(error.message || 'خطای ناشناخته رخ داد');
+                    setProgress('خطا در اجرا', 100);
+                }
+            } finally {
+                document.getElementById('startBtn').classList.remove('hidden');
+                document.getElementById('cancelBtn').classList.add('hidden');
+                document.getElementById('startBtn').innerHTML = `<span>تحلیل مجدد</span><i class="fas fa-redo text-xs"></i>`;
             }
-
-            rankedConfigs = parsed.map(item => {
-                const probe = probeResults.get(endpointKey(item.endpoint)) || { alive: false, dnsOk: false, connectOk: false, latency: dynamicTimeout };
-                return {
-                    config: item.config,
-                    ping: probe.latency,
-                    alive: probe.alive,
-                    score: scoreConfig(item.config, item.endpoint, probe, baseline.latency)
-                };
-            });
-
-            rankedConfigs.sort((a, b) => b.score - a.score || a.ping - b.ping);
-            rankedConfigs = rankedConfigs.slice(0, limit);
-
-            renderResults();
-            setProgress('تحلیل کامل شد.', 100);
-            document.getElementById('statusArea').classList.add('hidden');
-            document.getElementById('resultsArea').classList.remove('hidden');
-            document.getElementById('actionBar').classList.remove('hidden');
- codex/fix-syntax-error-from-merge-conflict-vseb7x
-            startBtn.classList.remove('hidden');
-            startBtn.innerHTML = `<i class="fas fa-redo"></i> تحلیل مجدد`;
-
-            document.getElementById('startBtn').classList.remove('hidden');
-            document.getElementById('startBtn').innerHTML = `<i class="fas fa-redo"></i> تحلیل مجدد`;
- main
         }
 
         function renderResults() {
             const container = document.getElementById('cardsContainer');
             container.innerHTML = '';
-            document.getElementById('countVal').innerText = rankedConfigs.length;
+            document.getElementById('countVal').textContent = rankedConfigs.length;
 
             if (sourceStats.length) {
                 const sourceSummary = sourceStats
-                    .map(s => `${s.name}: ${s.fetched}`)
+                    .map(s => `${escapeHtml(s.name)}: ${s.fetched}`)
                     .join(' | ');
-                container.innerHTML += `
-                    <div class="bg-blue-50 border border-blue-100 rounded-xl p-3 text-[11px] text-blue-700">${sourceSummary}</div>
-                `;
+                    
+                const summaryDiv = document.createElement('div');
+                summaryDiv.className = 'bg-blue-50 border border-blue-100 rounded-xl p-3 text-[11px] text-blue-700';
+                summaryDiv.textContent = sourceSummary;
+                container.appendChild(summaryDiv);
             }
 
             rankedConfigs.forEach(item => {
                 const type = item.config.split('://')[0].toUpperCase();
-                const name = item.config.includes('#') ? decodeURIComponent(item.config.split('#')[1]) : 'Config';
+                let name = 'Config';
+                
+                try {
+                    if (item.config.includes('#')) {
+                        name = decodeURIComponent(item.config.split('#')[1]);
+                    }
+                } catch (e) {
+                    logError('renderResults decode', e);
+                }
+                
                 const stateColor = item.score >= 70 ? 'text-green-600' : (item.score >= 45 ? 'text-yellow-600' : 'text-red-600');
                 const stateLabel = item.score >= 70 ? 'پیشنهادی' : (item.score >= 45 ? 'متوسط' : 'ضعیف');
                 const health = item.alive ? 'سالم' : 'نامطمئن';
 
-                container.innerHTML += `
-                    <div class="bg-white border border-gray-100 rounded-xl p-3 flex justify-between items-center shadow-sm">
-                        <div class="flex items-center gap-3 overflow-hidden">
-                            <span class="bg-blue-50 text-blue-600 font-bold text-[10px] px-2 py-1 rounded">${type}</span>
-                            <div class="truncate">
-                                <div class="font-bold text-xs text-gray-700 truncate w-36">${name}</div>
-                                <div class="text-[10px] text-gray-400 font-mono truncate w-36 opacity-70">${item.config}</div>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-xs font-bold font-mono ${stateColor}">${item.score}/100</div>
-                            <div class="text-[10px] text-gray-500">${stateLabel} • ${health} • ${item.ping}ms</div>
+                const card = document.createElement('div');
+                card.className = 'bg-white border border-gray-100 rounded-xl p-3 flex justify-between items-center shadow-sm';
+                card.innerHTML = `
+                    <div class="flex items-center gap-3 overflow-hidden">
+                        <span class="bg-blue-50 text-blue-600 font-bold text-[10px] px-2 py-1 rounded">${escapeHtml(type)}</span>
+                        <div class="truncate">
+                            <div class="font-bold text-xs text-gray-700 truncate w-36">${escapeHtml(name)}</div>
+                            <div class="text-[10px] text-gray-400 font-mono truncate w-36 opacity-70" title="${escapeHtml(item.config)}">${escapeHtml(item.config.substring(0, 50))}...</div>
                         </div>
                     </div>
+                    <div class="text-right">
+                        <div class="text-xs font-bold font-mono ${stateColor}">${item.score}/100</div>
+                        <div class="text-[10px] text-gray-500">${escapeHtml(stateLabel)} • ${escapeHtml(health)} • ${item.ping}ms</div>
+                    </div>
                 `;
+                container.appendChild(card);
             });
         }
 
+        // ==================== Export Functions ====================
+        
         function copyAll() {
+            if (!rankedConfigs.length) {
+                showError('هیچ کانفیگی برای کپی وجود ندارد.');
+                return;
+            }
+            
             const txt = rankedConfigs.map(c => c.config).join('\n');
-            navigator.clipboard.writeText(txt).then(() => alert('کپی شد!'));
+            
+            navigator.clipboard.writeText(txt)
+                .then(() => {
+                    showError('✓ همه کانفیگ‌ها کپی شدند!');
+                })
+                .catch(err => {
+                    logError('copyAll', err);
+                    showError('خطا در کپی کردن');
+                });
         }
 
         function downloadSub() {
-            const txt = rankedConfigs.map(c => c.config).join('\n');
-            const blob = new Blob([btoa(txt)], { type: 'text/plain' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'Subscription.txt';
-            link.click();
+            if (!rankedConfigs.length) {
+                showError('هیچ کانفیگی برای دانلود وجود ندارد.');
+                return;
+            }
+            
+            try {
+                const txt = rankedConfigs.map(c => c.config).join('\n');
+                const encoded = btoa(unescape(encodeURIComponent(txt)));
+                const blob = new Blob([encoded], { type: 'text/plain;charset=utf-8' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `Subscription_${Date.now()}.txt`;
+                link.click();
+                URL.revokeObjectURL(link.href);
+            } catch (err) {
+                logError('downloadSub', err);
+                showError('خطا در دانلود فایل');
+            }
         }
 
- codex/fix-syntax-error-from-merge-conflict-vseb7x
-        assertNoConflictMarkers();
-
-
- main
-        renderSources();
+        // ==================== Initialization ====================
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            renderSources();
+        });
     </script>
 
 </body>
