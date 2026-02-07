@@ -82,7 +82,7 @@ trojan://password@server:port...
 ./scripts/check_conflict_markers.sh index.html
 ```
 
-این ابزار وجود خطوط `<<<<<<<` / `=======` / `>>>>>>>` را چک می‌کند و در صورت وجود، خطا می‌دهد.
+این ابزار وجود خطوط `<<<<<<<` / `=======` / `>>>>>>>` و همین‌طور branch-labelهای تک‌خطیِ باقی‌مانده (مثل `main` یا `codex/optimize-code-performance-*`) را چک می‌کند و در صورت وجود، خطا می‌دهد.
 
 ## 🤝 مشارکت
 

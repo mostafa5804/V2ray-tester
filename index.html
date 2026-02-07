@@ -198,7 +198,8 @@
 
         function assertNoConflictMarkers() {
             const html = document.documentElement.innerHTML;
-            if (/<<<<<<<|=======|>>>>>>>/.test(html)) {
+            const conflictPattern = /^\s*(<<<<<<<\s+.+|=======|>>>>>>>\s+.+|main|codex\/optimize-code-performance-[A-Za-z0-9-]+)\s*$/m;
+            if (conflictPattern.test(html)) {
                 setProgress('خطا: تداخل گیت در فایل پیدا شد. لطفاً conflict ها را کامل resolve کنید.', 100);
                 document.getElementById('statusArea').classList.remove('hidden');
                 throw new Error('Git merge conflict markers detected in index.html');

@@ -2,11 +2,14 @@
 set -euo pipefail
 
 TARGETS=${*:-"index.html"}
-PATTERN='^\s*(<<<<<<<|=======|>>>>>>>)'
+
+# Detect real git conflict markers and common leftover branch-label lines
+# that have previously leaked into index.html and broken JS parsing.
+PATTERN='^\s*(<<<<<<<\s+.+|=======|>>>>>>>\s+.+|main|codex/optimize-code-performance-[[:alnum:]-]+)\s*$'
 
 if rg -n "$PATTERN" $TARGETS; then
-  echo "❌ Git merge conflict markers found. Resolve them before commit."
+  echo "❌ Conflict artifacts found. Resolve them before commit/deploy."
   exit 1
 fi
 
-echo "✅ No Git merge conflict markers found in: $TARGETS"
+echo "✅ No conflict artifacts found in: $TARGETS"
